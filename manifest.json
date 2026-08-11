@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Gentle Focus",
+  "version": "0.1.0",
+  "description": "Gentle friction between you and distracting sites. 100% local, no accounts, no servers.",
+  "permissions": ["storage", "alarms", "webNavigation", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Gentle Focus"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}
