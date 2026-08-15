@@ -181,8 +181,53 @@ input:focus {
   width: 96px;
 }
 
-.saved {
-  margin: 12px 0 0;
+.note {
+  margin: 0 0 16px;
   font-size: 13px;
-  color: var(--accent);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+select {
+  padding: 8px 10px;
+  border: 1px solid var(--ring);
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.field select {
+  flex: 0 0 auto;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }

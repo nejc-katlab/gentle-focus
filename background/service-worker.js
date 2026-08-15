@@ -48,6 +48,19 @@ async function grantUnlock(target) {
   return expiresAt
 }
 
+async function grantOverride(target, durationMin) {
+  const { blocklist, unlocks, overrideLog } = await getAll()
+  const match = findMatch(target, blocklist)
+  if (!match) return null
+  const expiresAt = Date.now() + durationMin * 60 * 1000
+  unlocks[match.pattern] = { expiresAt, grantedBy: 'override' }
+  await set('unlocks', unlocks)
+  chrome.alarms.create(EXPIRE_PREFIX + match.pattern, { when: expiresAt })
+  overrideLog.push({ site: match.pattern, ts: Date.now(), durationMin })
+  await set('overrideLog', overrideLog.slice(-500))
+  return expiresAt
+}
+
 async function expireUnlock(pattern) {
   const unlocks = await get('unlocks')
   if (unlocks[pattern]) {
@@ -93,6 +106,10 @@ chrome.alarms.onAlarm.addListener(alarm => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === 'GATE_COMPLETED') {
     grantUnlock(msg.target).then(expiresAt => sendResponse({ ok: true, expiresAt }))
+    return true
+  }
+  if (msg?.type === 'OVERRIDE_REQUESTED') {
+    grantOverride(msg.target, msg.durationMin).then(expiresAt => sendResponse({ ok: true, expiresAt }))
     return true
   }
   if (msg?.type === 'GET_STATE') {

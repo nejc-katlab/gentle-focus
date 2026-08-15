@@ -11,12 +11,42 @@
     <p class="eyebrow">Gentle Focus</p>
     <h1 id="title">…</h1>
     <p class="sub" id="sub"></p>
-    <div class="timer" id="timer">
-      <span id="count"></span>
+
+    <div id="chooser" class="chooser" hidden></div>
+
+    <section id="friction" class="friction" hidden>
+      <div id="mount" class="mount"></div>
+      <div id="dwell" class="dwell" hidden><span id="count"></span></div>
+      <button id="continue" class="primary" disabled>Continue</button>
+      <button id="switchTimer" class="link" hidden>Rather just wait it out?</button>
+    </section>
+
+    <div class="footer-links" id="footerLinks">
+      <a href="#" id="overrideLink" class="quiet">I need this page for something important</a>
+      <a href="#" id="optionsLink" class="quiet">Settings</a>
     </div>
-    <button id="continue" class="primary" disabled>Continue</button>
-    <a href="#" id="optionsLink" class="quiet">Settings</a>
   </main>
+
+  <div id="overrideBackdrop" class="backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+      <h2 id="ovTitle">This is your call.</h2>
+      <p class="ov-body">You set this block up for a reason — but you're the one in charge, not us. We're not here to stop you, just to make sure this is a choice and not a reflex.</p>
+      <label class="ov-duration">
+        <span>If you continue, this page will be unblocked for:</span>
+        <select id="ovDuration">
+          <option value="5">5 minutes</option>
+          <option value="15" selected>15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
+      </label>
+      <div class="ov-actions">
+        <button id="ovBack" class="primary">Take a breath, go back</button>
+        <button id="ovUnlock" class="ghost" disabled>I understand — unlock</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="gate.js"></script>
 </body>
 </html>

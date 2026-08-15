@@ -1,4 +1,5 @@
-import { get } from '../shared/storage.js'
+import { getPuzzle } from './puzzles/index.js'
+import { get, set } from '../shared/storage.js'
 import { hostFromUrl } from '../shared/matcher.js'
 
 const params = new URLSearchParams(location.search)
@@ -7,60 +8,207 @@ const expired = params.get('expired') === '1'
 
 const titleEl = document.getElementById('title')
 const subEl = document.getElementById('sub')
-const timerEl = document.getElementById('timer')
+const chooserEl = document.getElementById('chooser')
+const frictionEl = document.getElementById('friction')
+const mountEl = document.getElementById('mount')
+const dwellEl = document.getElementById('dwell')
 const countEl = document.getElementById('count')
-const btn = document.getElementById('continue')
+const continueBtn = document.getElementById('continue')
+const switchTimerBtn = document.getElementById('switchTimer')
+const overrideLink = document.getElementById('overrideLink')
 const optionsLink = document.getElementById('optionsLink')
+const backdrop = document.getElementById('overrideBackdrop')
+const ovDuration = document.getElementById('ovDuration')
+const ovBack = document.getElementById('ovBack')
+const ovUnlock = document.getElementById('ovUnlock')
+
+const TILE_COPY = {
+  timer: { name: 'Wait a timer', desc: 'A short, calm pause.' },
+  puzzle: { name: 'Solve a quick puzzle', desc: 'Find the numbers in order.' },
+  fact: { name: 'Read a fun fact', desc: 'Learn something, then carry on.' }
+}
+
+let settings
 
 optionsLink.addEventListener('click', e => {
   e.preventDefault()
   chrome.runtime.openOptionsPage()
 })
 
-if (!target) {
-  titleEl.textContent = 'Nothing to unlock'
-  subEl.textContent = 'Open this from a blocked site, or head to settings.'
-  timerEl.hidden = true
-  btn.hidden = true
-} else {
+async function main() {
+  if (!target) {
+    titleEl.textContent = 'Nothing to unlock'
+    subEl.textContent = 'Open this from a blocked site, or head to settings.'
+    overrideLink.hidden = true
+    return
+  }
+
   const site = hostFromUrl(target) || 'this site'
   titleEl.textContent = `Taking a moment before ${site}`
-  if (expired) subEl.textContent = "Time's up — back to it. You've got this."
-  else subEl.textContent = 'A short pause, then you can continue.'
-  runTimer()
+  subEl.textContent = expired
+    ? "Time's up — back to it. You've got this."
+    : 'A short pause, then you can continue.'
+
+  settings = await get('settings')
+  setupOverride()
+
+  const enabled = Object.keys(settings.gateTypes).filter(k => settings.gateTypes[k])
+  const types = enabled.length ? enabled : ['timer']
+
+  if (settings.surpriseMe) startFriction(types[Math.floor(Math.random() * types.length)])
+  else if (types.length === 1) startFriction(types[0])
+  else showChooser(types)
 }
 
-async function runTimer() {
-  const settings = await get('settings')
-  let remaining = settings.timerSec ?? 15
-  render(remaining)
+function showChooser(types) {
+  chooserEl.hidden = false
+  for (const type of types) {
+    const copy = TILE_COPY[type]
+    const tile = document.createElement('button')
+    tile.type = 'button'
+    tile.className = 'tile'
+    const name = document.createElement('span')
+    name.className = 'tile-name'
+    name.textContent = copy.name
+    const desc = document.createElement('span')
+    desc.className = 'tile-desc'
+    desc.textContent = copy.desc
+    tile.append(name, desc)
+    tile.addEventListener('click', () => {
+      chooserEl.hidden = true
+      startFriction(type)
+    })
+    chooserEl.appendChild(tile)
+  }
+}
+
+function startFriction(type) {
+  frictionEl.hidden = false
+  continueBtn.disabled = true
+  if (type === 'timer') runTimer(settings.timerSec)
+  else if (type === 'fact') runFact()
+  else if (type === 'puzzle') runPuzzle()
+}
+
+function enableContinue() {
+  continueBtn.disabled = false
+  continueBtn.textContent = 'Continue'
+  continueBtn.focus()
+}
+
+function runDwell(seconds, onDone) {
+  dwellEl.hidden = false
+  let remaining = seconds
+  const tick = () => {
+    countEl.textContent = remaining > 0 ? String(remaining) : '✓'
+    if (remaining > 0) continueBtn.textContent = `Continue in ${remaining}s`
+  }
+  tick()
   const iv = setInterval(() => {
     remaining -= 1
-    render(remaining)
+    tick()
     if (remaining <= 0) {
       clearInterval(iv)
-      enable()
+      onDone()
     }
   }, 1000)
 }
 
-function render(sec) {
-  if (sec > 0) {
-    countEl.textContent = `${sec}`
-    btn.textContent = `Continue in ${sec}s`
-  } else {
-    countEl.textContent = '✓'
+function runTimer(sec) {
+  runDwell(sec ?? 15, enableContinue)
+}
+
+async function runFact() {
+  const fact = await pickFact()
+  mountEl.innerHTML = ''
+  const cat = document.createElement('p')
+  cat.className = 'fact-cat'
+  cat.textContent = fact.category
+  const text = document.createElement('p')
+  text.className = 'fact'
+  text.textContent = fact.text
+  mountEl.append(cat, text)
+  runDwell(settings.factDwellSec ?? 20, enableContinue)
+}
+
+async function pickFact() {
+  const res = await fetch(chrome.runtime.getURL('data/facts.json'))
+  const facts = await res.json()
+  let seen = await get('factsSeen')
+  let pool = facts.filter(f => !seen.includes(f.id))
+  if (pool.length === 0) {
+    pool = facts
+    seen = []
   }
+  const fact = pool[Math.floor(Math.random() * pool.length)]
+  await set('factsSeen', [...seen, fact.id])
+  return fact
 }
 
-function enable() {
-  btn.disabled = false
-  btn.textContent = 'Continue'
-  btn.focus()
+function runPuzzle() {
+  const puzzle = getPuzzle('schulte').generate(settings.difficulty)
+  puzzle.mount(mountEl, enableContinue)
+  switchTimerBtn.hidden = false
+  switchTimerBtn.addEventListener('click', () => {
+    switchTimerBtn.hidden = true
+    mountEl.innerHTML = ''
+    continueBtn.disabled = true
+    continueBtn.textContent = 'Continue'
+    runTimer(settings.timerSec)
+  }, { once: true })
 }
 
-btn.addEventListener('click', async () => {
-  btn.disabled = true
+continueBtn.addEventListener('click', async () => {
+  continueBtn.disabled = true
   await chrome.runtime.sendMessage({ type: 'GATE_COMPLETED', target })
   location.href = target
 })
+
+function setupOverride() {
+  ovDuration.value = String(settings.overrideDefaultMin ?? 15)
+  overrideLink.addEventListener('click', e => {
+    e.preventDefault()
+    openOverride()
+  })
+  ovBack.addEventListener('click', closeOverride)
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) closeOverride()
+  })
+  ovUnlock.addEventListener('click', async () => {
+    ovUnlock.disabled = true
+    const durationMin = Number(ovDuration.value)
+    await chrome.runtime.sendMessage({ type: 'OVERRIDE_REQUESTED', target, durationMin })
+    location.href = target
+  })
+}
+
+let ovTimer
+function openOverride() {
+  backdrop.hidden = false
+  let remaining = settings.overrideDelaySec ?? 3
+  ovUnlock.disabled = true
+  const tick = () => {
+    ovUnlock.textContent = remaining > 0 ? `I understand — unlock (${remaining})` : 'I understand — unlock'
+  }
+  tick()
+  clearInterval(ovTimer)
+  ovTimer = setInterval(() => {
+    remaining -= 1
+    tick()
+    if (remaining <= 0) {
+      clearInterval(ovTimer)
+      ovUnlock.disabled = false
+    }
+  }, 1000)
+}
+
+function closeOverride() {
+  backdrop.hidden = true
+  clearInterval(ovTimer)
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !backdrop.hidden) closeOverride()
+})
+
+main()

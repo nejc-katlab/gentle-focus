@@ -23,6 +23,27 @@
     </section>
 
     <section class="card">
+      <h2>Friction</h2>
+      <p class="note">Which gates can appear. With more than one on, you'll choose at the gate — or let Surprise me pick.</p>
+      <label class="check"><input type="checkbox" id="gt-timer"> Wait a timer</label>
+      <label class="check"><input type="checkbox" id="gt-puzzle"> Solve a quick puzzle</label>
+      <label class="check"><input type="checkbox" id="gt-fact"> Read a fun fact</label>
+      <label class="check"><input type="checkbox" id="surpriseMe"> Surprise me — pick one at random</label>
+      <label class="field">
+        <span class="field-label">Puzzle difficulty</span>
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Fact reading time (seconds)</span>
+        <input id="factDwellSec" type="number" min="0" max="120" step="1">
+      </label>
+    </section>
+
+    <section class="card">
       <h2>Time</h2>
       <label class="field">
         <span class="field-label">Minutes unlocked per visit</span>
@@ -36,9 +57,28 @@
         <span class="field-label">Warn me before time runs out (seconds)</span>
         <input id="expiryWarnSec" type="number" min="0" max="600" step="1">
       </label>
-      <p class="saved" id="savedMsg" hidden>Saved.</p>
+    </section>
+
+    <section class="card">
+      <h2>Override</h2>
+      <p class="note">The escape hatch on the gate, for when you truly need the page.</p>
+      <label class="field">
+        <span class="field-label">Default unlock length (minutes)</span>
+        <select id="overrideDefaultMin">
+          <option value="5">5</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="60">60</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">Wait before unlock is clickable (seconds)</span>
+        <input id="overrideDelaySec" type="number" min="0" max="30" step="1">
+      </label>
     </section>
   </main>
+
+  <p class="toast" id="savedToast" hidden>Saved</p>
   <script type="module" src="options.js"></script>
 </body>
 </html>
