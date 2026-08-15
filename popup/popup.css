@@ -51,14 +51,30 @@ body {
   color: var(--muted);
 }
 
-.primary {
+.primary,
+.ghost {
   width: 100%;
   padding: 10px 14px;
-  border: none;
   border-radius: 10px;
-  background: var(--accent);
-  color: var(--accent-ink);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.primary {
+  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  margin-bottom: 8px;
+}
+
+.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ghost {
+  border: 1px solid var(--ring);
+  background: transparent;
+  color: var(--ink);
 }

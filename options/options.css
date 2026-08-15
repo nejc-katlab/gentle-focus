@@ -3,7 +3,10 @@
   --card: #fffdf8;
   --ink: #33312e;
   --muted: #7c766c;
+  --accent: #6b8f71;
+  --accent-ink: #ffffff;
   --ring: #e5e0d5;
+  --field: #faf8f2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -12,8 +15,15 @@
     --card: #26251f;
     --ink: #e9e5dc;
     --muted: #a49d90;
+    --accent: #7fa585;
+    --accent-ink: #17170f;
     --ring: #3a382f;
+    --field: #201f1a;
   }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -45,6 +55,7 @@ h1 {
   border: 1px solid var(--ring);
   border-radius: 16px;
   padding: 24px;
+  margin-bottom: 20px;
 }
 
 h2 {
@@ -53,24 +64,125 @@ h2 {
   font-weight: 600;
 }
 
+.add-row {
+  display: flex;
+  gap: 8px;
+}
+
+input[type="text"],
+input[type="number"] {
+  flex: 1;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ring);
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.primary {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.msg {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .list {
-  margin: 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .list li {
-  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--ring);
-  font-size: 15px;
 }
 
 .list li:last-child {
   border-bottom: none;
 }
 
-.note {
-  margin: 16px 0 0;
-  font-size: 13px;
+.pattern {
+  font-size: 15px;
+  word-break: break-all;
+}
+
+.type-tag {
+  margin-left: 8px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--muted);
+}
+
+.remove {
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.remove:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+.empty {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ring);
+}
+
+.field:last-of-type {
+  border-bottom: none;
+}
+
+.field-label {
+  font-size: 15px;
+}
+
+.field input {
+  flex: 0 0 96px;
+  width: 96px;
+}
+
+.saved {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--accent);
 }

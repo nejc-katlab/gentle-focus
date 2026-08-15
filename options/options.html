@@ -13,8 +13,30 @@
 
     <section class="card">
       <h2>Blocked sites</h2>
+      <form id="addForm" class="add-row">
+        <input id="addInput" type="text" placeholder="reddit.com  or  youtube.com/shorts/*" autocomplete="off" spellcheck="false">
+        <button type="submit" class="primary">Add</button>
+      </form>
+      <p class="msg" id="addMsg" hidden></p>
       <ul id="blocklist" class="list"></ul>
-      <p class="note">Editing comes next. For now this is the built-in starter list.</p>
+      <p class="empty" id="empty" hidden>No sites yet. Add one above.</p>
+    </section>
+
+    <section class="card">
+      <h2>Time</h2>
+      <label class="field">
+        <span class="field-label">Minutes unlocked per visit</span>
+        <input id="budgetMin" type="number" min="1" max="240" step="1">
+      </label>
+      <label class="field">
+        <span class="field-label">Timer at the gate (seconds)</span>
+        <input id="timerSec" type="number" min="0" max="600" step="1">
+      </label>
+      <label class="field">
+        <span class="field-label">Warn me before time runs out (seconds)</span>
+        <input id="expiryWarnSec" type="number" min="0" max="600" step="1">
+      </label>
+      <p class="saved" id="savedMsg" hidden>Saved.</p>
     </section>
   </main>
   <script type="module" src="options.js"></script>
