@@ -1,7 +1,15 @@
+import slide from './slide.js'
 import schulte from './schulte.js'
+import unscramble from './unscramble.js'
 
-export const puzzles = [schulte]
+export const puzzles = [schulte, unscramble, slide]
 
 export function getPuzzle(id) {
   return puzzles.find(p => p.id === id) ?? puzzles[0]
+}
+
+export function enabledPuzzles(settings) {
+  const modules = settings?.puzzleModules ?? {}
+  const on = puzzles.filter(p => modules[p.id] !== false)
+  return on.length ? on : puzzles
 }

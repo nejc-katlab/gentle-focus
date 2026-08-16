@@ -183,6 +183,77 @@ h1 {
   border-color: var(--muted);
 }
 
+.gate-stat {
+  margin: -16px 0 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.scrambled {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin: 8px 0 18px;
+}
+
+.unscramble-form {
+  display: flex;
+  gap: 8px;
+}
+
+.unscramble-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--ring);
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 16px;
+  font-family: inherit;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
+.puzzle-btn {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.slide {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 8px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.slide-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--ring);
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.slide-cell:hover:not(.slide-blank) {
+  border-color: var(--accent);
+}
+
+.slide-blank {
+  background: transparent;
+  border-style: dashed;
+  cursor: default;
+}
+
 .primary {
   width: 100%;
   padding: 14px 20px;

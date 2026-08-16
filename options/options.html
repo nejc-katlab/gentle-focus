@@ -20,6 +20,11 @@
       <p class="msg" id="addMsg" hidden></p>
       <ul id="blocklist" class="list"></ul>
       <p class="empty" id="empty" hidden>No sites yet. Add one above.</p>
+      <div class="io-row">
+        <button type="button" id="exportBlocklist" class="ghost-sm">Export list</button>
+        <button type="button" id="importBlocklist" class="ghost-sm">Import list</button>
+        <input type="file" id="importBlockFile" accept="application/json" hidden>
+      </div>
     </section>
 
     <section class="card">
@@ -41,6 +46,10 @@
         <span class="field-label">Fact reading time (seconds)</span>
         <input id="factDwellSec" type="number" min="0" max="120" step="1">
       </label>
+      <p class="field-label" style="margin-top:8px">Puzzles in rotation</p>
+      <label class="check"><input type="checkbox" id="pm-schulte"> Find the numbers (Schulte)</label>
+      <label class="check"><input type="checkbox" id="pm-unscramble"> Unscramble a word</label>
+      <label class="check"><input type="checkbox" id="pm-slide"> Sliding tiles</label>
     </section>
 
     <section class="card">
@@ -116,6 +125,31 @@
         </select>
         <button type="submit" class="primary">Add schedule</button>
       </form>
+    </section>
+
+    <section class="card">
+      <h2>Tone &amp; messaging</h2>
+      <label class="field">
+        <span class="field-label">Message style</span>
+        <select id="tone">
+          <option value="encouraging">Encouraging</option>
+          <option value="neutral">Neutral</option>
+          <option value="minimal">Minimal</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="showStatsOnGate"> Show a small stat line on the gate</label>
+    </section>
+
+    <section class="card">
+      <h2>Stats &amp; data</h2>
+      <p class="note">All data stays on this device. Nothing is sent anywhere.</p>
+      <button type="button" id="openStats" class="ghost">Open stats</button>
+      <div class="io-row">
+        <button type="button" id="exportAll" class="ghost-sm">Export all data</button>
+        <button type="button" id="importAll" class="ghost-sm">Import all data</button>
+        <input type="file" id="importAllFile" accept="application/json" hidden>
+      </div>
+      <button type="button" id="resetAll" class="danger-sm">Reset everything…</button>
     </section>
   </main>
 

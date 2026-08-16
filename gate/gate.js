@@ -1,4 +1,6 @@
-import { getPuzzle } from './puzzles/index.js'
+import { msg } from '../shared/messages.js'
+import { currentStreak } from '../shared/stats.js'
+import { enabledPuzzles } from './puzzles/index.js'
 import { effectiveStrictness } from '../shared/sessions.js'
 import { findMatch, hostFromUrl } from '../shared/matcher.js'
 import { get, set, getUsageToday, effectiveDailyCap } from '../shared/storage.js'
@@ -9,6 +11,7 @@ const expired = params.get('expired') === '1'
 
 const titleEl = document.getElementById('title')
 const subEl = document.getElementById('sub')
+const gateStatEl = document.getElementById('gateStat')
 const chooserEl = document.getElementById('chooser')
 const frictionEl = document.getElementById('friction')
 const mountEl = document.getElementById('mount')
@@ -30,10 +33,12 @@ const TILE_COPY = {
 }
 
 let settings
+let tone = 'encouraging'
 let strictness = 'gentle'
 let stepsRequired = 1
 let stepsDone = 0
 let overrideDelaySec = 3
+let frictionType = 'timer'
 
 optionsLink.addEventListener('click', e => {
   e.preventDefault()
@@ -48,17 +53,17 @@ async function main() {
     return
   }
 
-  const site = hostFromUrl(target) || 'this site'
-  titleEl.textContent = `Taking a moment before ${site}`
-  subEl.textContent = expired
-    ? "Time's up — back to it. You've got this."
-    : 'A short pause, then you can continue.'
-
   settings = await get('settings')
+  tone = settings.tone ?? 'encouraging'
+  const site = hostFromUrl(target) || 'this site'
+  titleEl.textContent = msg('gateHeader', tone, site)
+  subEl.textContent = expired ? msg('gateSubExpired', tone) : msg('gateSubDefault', tone)
+
   const [session, schedules] = await Promise.all([get('session'), get('schedules')])
   strictness = effectiveStrictness({ session, schedules }, new Date())
   overrideDelaySec = strictness === 'strict' ? 10 : settings.overrideDelaySec
   setupOverride()
+  await showStatLine()
 
   const blocklist = await get('blocklist')
   const match = findMatch(target, blocklist)
@@ -67,21 +72,27 @@ async function main() {
   const used = match ? (usage.sites[match.pattern]?.minutes ?? 0) : 0
   if (cap > 0 && used >= cap) {
     titleEl.textContent = `That's your ${site} time for today`
-    subEl.textContent = `You've used the ${cap} minutes you set aside. The override below is still here if you truly need it.`
+    subEl.textContent = msg('capReached', tone, site, cap)
     return
   }
 
   if (strictness === 'strict') {
     titleEl.textContent = 'Focus session on'
-    subEl.textContent = 'A strict session is running, so the gate stays closed. The override below is here if you truly need it.'
+    subEl.textContent = msg('sessionStrict', tone)
     return
   }
 
   stepsRequired = strictness === 'firm' ? 2 : 1
-  if (strictness === 'firm' && !expired) {
-    subEl.textContent = 'Focus session on — two quick steps to continue.'
-  }
+  if (strictness === 'firm' && !expired) subEl.textContent = msg('firmTwoSteps', tone)
   beginSelection()
+}
+
+async function showStatLine() {
+  if (!settings.showStatsOnGate) return
+  const [overrideLog, stats] = await Promise.all([get('overrideLog'), get('stats')])
+  const streak = currentStreak(overrideLog, new Date(), stats.installedOn)
+  gateStatEl.textContent = `${streak} day${streak === 1 ? '' : 's'} without an override.`
+  gateStatEl.hidden = false
 }
 
 function beginSelection() {
@@ -94,7 +105,7 @@ function beginSelection() {
 }
 
 function startNextStep() {
-  subEl.textContent = 'One more step.'
+  subEl.textContent = msg('oneMoreStep', tone)
   frictionEl.hidden = true
   chooserEl.hidden = true
   chooserEl.innerHTML = ''
@@ -128,6 +139,7 @@ function showChooser(types) {
 }
 
 function startFriction(type) {
+  frictionType = type
   frictionEl.hidden = false
   continueBtn.disabled = true
   if (type === 'timer') runTimer(settings.timerSec)
@@ -193,7 +205,9 @@ async function pickFact() {
 }
 
 function runPuzzle() {
-  const puzzle = getPuzzle('schulte').generate(settings.difficulty)
+  const options = enabledPuzzles(settings)
+  const module = options[Math.floor(Math.random() * options.length)]
+  const puzzle = module.generate(settings.difficulty)
   puzzle.mount(mountEl, enableContinue)
   switchTimerBtn.hidden = false
   switchTimerBtn.onclick = () => {
@@ -212,7 +226,7 @@ continueBtn.addEventListener('click', async () => {
     startNextStep()
     return
   }
-  await chrome.runtime.sendMessage({ type: 'GATE_COMPLETED', target })
+  await chrome.runtime.sendMessage({ type: 'GATE_COMPLETED', target, friction: frictionType })
   location.href = target
 })
 

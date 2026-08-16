@@ -1,3 +1,4 @@
+import { msg } from '../shared/messages.js'
 import { findMatch } from '../shared/matcher.js'
 import { endOfLocalDay } from '../shared/time.js'
 import { activeSession, effectiveStrictness } from '../shared/sessions.js'
@@ -49,7 +50,15 @@ async function handleNavigation(details) {
   chrome.tabs.update(tabId, { url: gateUrl(url) })
 }
 
-async function grantUnlock(target) {
+async function recordGatePass(friction) {
+  const stats = await get('stats')
+  stats.gatesPassed = (stats.gatesPassed ?? 0) + 1
+  stats.frictionCounts = stats.frictionCounts ?? { timer: 0, puzzle: 0, fact: 0 }
+  if (friction && friction in stats.frictionCounts) stats.frictionCounts[friction] += 1
+  await set('stats', stats)
+}
+
+async function grantUnlock(target, friction) {
   const state = await getAll()
   const { settings, blocklist, unlocks } = state
   const match = findMatch(target, blocklist)
@@ -63,6 +72,7 @@ async function grantUnlock(target) {
   chrome.alarms.create(EXPIRE_PREFIX + match.pattern, { when: expiresAt })
   scheduleWarn(match.pattern, expiresAt, settings.expiryWarnSec)
   await bumpUnlockCount(match.pattern)
+  await recordGatePass(friction)
   return expiresAt
 }
 
@@ -116,13 +126,13 @@ async function warnSite(pattern) {
 async function toastInfo(sender) {
   const url = sender?.tab?.url
   if (!url) return {}
-  const { blocklist, unlocks } = await getAll()
+  const { blocklist, unlocks, settings } = await getAll()
   const match = findMatch(url, blocklist)
   if (!match) return {}
   const u = unlocks[match.pattern]
   if (!u || Date.now() >= u.expiresAt) return {}
   const mins = Math.max(1, Math.ceil((u.expiresAt - Date.now()) / 60000))
-  return { message: `${mins} minute${mins === 1 ? '' : 's'} left on ${match.pattern}.` }
+  return { message: msg('toastMinutesLeft', settings.tone, mins, match.pattern) }
 }
 
 async function startSession(durationMin, strictness) {
@@ -152,12 +162,13 @@ async function endPause() {
   await updateBadge()
 }
 
-function notifySessionEnd() {
+async function notifySessionEnd() {
+  const settings = await get('settings')
   chrome.notifications.create({
     type: 'basic',
     iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-    title: 'Session done — nice work.',
-    message: 'Your focus session has ended.'
+    title: msg('sessionEndTitle', settings.tone),
+    message: msg('sessionEndBody', settings.tone)
   })
 }
 
@@ -264,37 +275,37 @@ chrome.alarms.onAlarm.addListener(alarm => {
   }
 })
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg?.type === 'GATE_COMPLETED') {
-    grantUnlock(msg.target).then(expiresAt => sendResponse({ ok: expiresAt !== null, expiresAt }))
+chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+  if (req?.type === 'GATE_COMPLETED') {
+    grantUnlock(req.target, req.friction).then(expiresAt => sendResponse({ ok: expiresAt !== null, expiresAt }))
     return true
   }
-  if (msg?.type === 'OVERRIDE_REQUESTED') {
-    grantOverride(msg.target, msg.durationMin).then(expiresAt => sendResponse({ ok: true, expiresAt }))
+  if (req?.type === 'OVERRIDE_REQUESTED') {
+    grantOverride(req.target, req.durationMin).then(expiresAt => sendResponse({ ok: true, expiresAt }))
     return true
   }
-  if (msg?.type === 'START_SESSION') {
-    startSession(msg.durationMin, msg.strictness).then(endsAt => sendResponse({ ok: true, endsAt }))
+  if (req?.type === 'START_SESSION') {
+    startSession(req.durationMin, req.strictness).then(endsAt => sendResponse({ ok: true, endsAt }))
     return true
   }
-  if (msg?.type === 'END_SESSION') {
+  if (req?.type === 'END_SESSION') {
     endSession(false).then(() => sendResponse({ ok: true }))
     return true
   }
-  if (msg?.type === 'PAUSE') {
-    const expiresAt = msg.untilEndOfDay ? endOfLocalDay(new Date()) : Date.now() + msg.durationMin * 60 * 1000
+  if (req?.type === 'PAUSE') {
+    const expiresAt = req.untilEndOfDay ? endOfLocalDay(new Date()) : Date.now() + req.durationMin * 60 * 1000
     startPause(expiresAt).then(() => sendResponse({ ok: true, expiresAt }))
     return true
   }
-  if (msg?.type === 'RESUME') {
+  if (req?.type === 'RESUME') {
     endPause().then(() => sendResponse({ ok: true }))
     return true
   }
-  if (msg?.type === 'GET_TOAST_INFO') {
+  if (req?.type === 'GET_TOAST_INFO') {
     toastInfo(sender).then(sendResponse)
     return true
   }
-  if (msg?.type === 'GET_STATE') {
+  if (req?.type === 'GET_STATE') {
     getAll().then(state => sendResponse(state))
     return true
   }

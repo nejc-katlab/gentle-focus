@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — Stats</title>
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <main class="page">
+    <button id="back" class="back">← Settings</button>
+    <h1>Your stats</h1>
+    <p class="lede">All local, nothing sent anywhere. These inform — they never judge.</p>
+
+    <div class="grid">
+      <div class="stat-card"><p class="stat-num" id="streak">–</p><p class="stat-label">days without an override</p></div>
+      <div class="stat-card"><p class="stat-num" id="gates">–</p><p class="stat-label">gates passed</p></div>
+      <div class="stat-card"><p class="stat-num" id="ovWeek">–</p><p class="stat-label">overrides this week</p></div>
+      <div class="stat-card"><p class="stat-num" id="ovTotal">–</p><p class="stat-label">overrides logged</p></div>
+    </div>
+
+    <section class="card">
+      <h2>Friction you chose</h2>
+      <div id="friction"></div>
+    </section>
+
+    <section class="card">
+      <h2>Time today</h2>
+      <ul id="today" class="list"></ul>
+      <p class="empty" id="todayEmpty" hidden>No time tracked yet today.</p>
+    </section>
+
+    <section class="card">
+      <h2>Last 7 days</h2>
+      <ul id="week" class="list"></ul>
+    </section>
+  </main>
+  <script type="module" src="stats.js"></script>
+</body>
+</html>

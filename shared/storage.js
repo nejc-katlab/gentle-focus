@@ -15,7 +15,10 @@ const DEFAULTS = {
     overrideDelaySec: 3,
     sessionDefaultMin: 25,
     sessionDefaultStrictness: 'gentle',
-    sessionEndNotify: true
+    sessionEndNotify: true,
+    tone: 'encouraging',
+    showStatsOnGate: false,
+    puzzleModules: { schulte: true, unscramble: true, slide: true }
   },
   blocklist: [
     { pattern: 'reddit.com', type: 'domain' },
@@ -28,12 +31,18 @@ const DEFAULTS = {
   overrideLog: [],
   factsSeen: [],
   usageToday: { date: '', sites: {} },
-  timing: { site: null, since: 0 }
+  timing: { site: null, since: 0 },
+  stats: { gatesPassed: 0, frictionCounts: { timer: 0, puzzle: 0, fact: 0 }, history: {} }
 }
 
 function withSettingDefaults(stored) {
   const d = DEFAULTS.settings
-  return { ...d, ...stored, gateTypes: { ...d.gateTypes, ...(stored?.gateTypes) } }
+  return {
+    ...d,
+    ...stored,
+    gateTypes: { ...d.gateTypes, ...(stored?.gateTypes) },
+    puzzleModules: { ...d.puzzleModules, ...(stored?.puzzleModules) }
+  }
 }
 
 function withDefaults(key, value) {
@@ -64,6 +73,9 @@ export async function seedDefaults() {
   const toWrite = {}
   for (const k of keys) if (stored[k] === undefined) toWrite[k] = DEFAULTS[k]
   toWrite.settings = withSettingDefaults(stored.settings)
+  const stats = { ...(stored.stats ?? DEFAULTS.stats) }
+  if (!stats.installedOn) stats.installedOn = todayKey(new Date())
+  toWrite.stats = stats
   await chrome.storage.local.set(toWrite)
 }
 
@@ -87,11 +99,24 @@ export async function removeBlockEntry(pattern) {
   }
 }
 
+async function archiveDay(usage) {
+  const stats = await get('stats')
+  const history = stats.history ?? {}
+  history[usage.date] = { minutes: usage.sites }
+  const keys = Object.keys(history).sort()
+  while (keys.length > 90) delete history[keys.shift()]
+  stats.history = history
+  await set('stats', stats)
+}
+
 export async function getUsageToday() {
   const today = todayKey(new Date())
   const usage = await get('usageToday')
-  if (usage.date !== today) return { date: today, sites: {} }
-  return usage
+  if (usage.date === today) return usage
+  if (usage.date && Object.keys(usage.sites).length) await archiveDay(usage)
+  const fresh = { date: today, sites: {} }
+  await set('usageToday', fresh)
+  return fresh
 }
 
 export async function addUsageMinutes(site, minutes) {

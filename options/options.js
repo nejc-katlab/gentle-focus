@@ -1,4 +1,4 @@
-import { get, set, addBlockEntry, removeBlockEntry } from '../shared/storage.js'
+import { get, set, seedDefaults, addBlockEntry, removeBlockEntry } from '../shared/storage.js'
 
 const form = document.getElementById('addForm')
 const input = document.getElementById('addInput')
@@ -8,9 +8,10 @@ const emptyEl = document.getElementById('empty')
 const savedToast = document.getElementById('savedToast')
 
 const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'dailyCapMin', 'factDwellSec', 'overrideDefaultMin', 'overrideDelaySec', 'sessionDefaultMin']
-const STRING_FIELDS = ['difficulty', 'sessionDefaultStrictness']
-const CHECK_FIELDS = ['surpriseMe', 'sessionEndNotify']
+const STRING_FIELDS = ['difficulty', 'sessionDefaultStrictness', 'tone']
+const CHECK_FIELDS = ['surpriseMe', 'sessionEndNotify', 'showStatsOnGate']
 const GATE_TYPES = ['timer', 'puzzle', 'fact']
+const PUZZLE_MODULES = ['schulte', 'unscramble', 'slide']
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const scheduleList = document.getElementById('scheduleList')
@@ -80,6 +81,9 @@ async function loadSettings() {
   for (const type of GATE_TYPES) {
     document.getElementById(`gt-${type}`).checked = !!settings.gateTypes[type]
   }
+  for (const id of PUZZLE_MODULES) {
+    document.getElementById(`pm-${id}`).checked = settings.puzzleModules?.[id] !== false
+  }
 }
 
 let toastTimer
@@ -105,12 +109,22 @@ async function saveSettings() {
   for (const type of GATE_TYPES) {
     settings.gateTypes[type] = document.getElementById(`gt-${type}`).checked
   }
+  settings.puzzleModules = {}
+  for (const id of PUZZLE_MODULES) {
+    settings.puzzleModules[id] = document.getElementById(`pm-${id}`).checked
+  }
   await set('settings', settings)
   flashSaved()
 }
 
 function wireSettings() {
-  const ids = [...NUMBER_FIELDS, ...STRING_FIELDS, ...CHECK_FIELDS, ...GATE_TYPES.map(t => `gt-${t}`)]
+  const ids = [
+    ...NUMBER_FIELDS,
+    ...STRING_FIELDS,
+    ...CHECK_FIELDS,
+    ...GATE_TYPES.map(t => `gt-${t}`),
+    ...PUZZLE_MODULES.map(p => `pm-${p}`)
+  ]
   for (const id of ids) {
     document.getElementById(id).addEventListener('change', saveSettings)
   }
@@ -196,6 +210,90 @@ scheduleForm.addEventListener('submit', async e => {
   for (const cb of schedDays.querySelectorAll('input:checked')) cb.checked = false
   renderSchedules()
   flashSaved()
+})
+
+const ALL_KEYS = ['settings', 'blocklist', 'schedules', 'stats', 'overrideLog']
+
+function downloadJson(filename, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function readJsonFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        resolve(JSON.parse(reader.result))
+      } catch (err) {
+        reject(err)
+      }
+    }
+    reader.onerror = () => reject(reader.error)
+    reader.readAsText(file)
+  })
+}
+
+document.getElementById('exportBlocklist').addEventListener('click', async () => {
+  downloadJson('gentle-focus-blocklist.json', await get('blocklist'))
+})
+
+const importBlockFile = document.getElementById('importBlockFile')
+document.getElementById('importBlocklist').addEventListener('click', () => importBlockFile.click())
+importBlockFile.addEventListener('change', async () => {
+  const file = importBlockFile.files[0]
+  if (!file) return
+  try {
+    const data = await readJsonFile(file)
+    if (!Array.isArray(data)) throw new Error('bad')
+    for (const item of data) {
+      const raw = typeof item === 'string' ? item : item?.pattern
+      if (raw) await addBlockEntry(raw)
+    }
+    renderList()
+    flashSaved()
+  } catch {
+    showAddMsg('That file did not look like a blocklist.')
+  }
+  importBlockFile.value = ''
+})
+
+document.getElementById('openStats').addEventListener('click', () => {
+  window.open(chrome.runtime.getURL('stats/stats.html'))
+})
+
+document.getElementById('exportAll').addEventListener('click', async () => {
+  const bundle = { app: 'gentle-focus', version: 1 }
+  for (const key of ALL_KEYS) bundle[key] = await get(key)
+  downloadJson('gentle-focus-data.json', bundle)
+})
+
+const importAllFile = document.getElementById('importAllFile')
+document.getElementById('importAll').addEventListener('click', () => importAllFile.click())
+importAllFile.addEventListener('change', async () => {
+  const file = importAllFile.files[0]
+  if (!file) return
+  try {
+    const data = await readJsonFile(file)
+    if (!data || typeof data !== 'object') throw new Error('bad')
+    for (const key of ALL_KEYS) if (key in data) await set(key, data[key])
+    location.reload()
+  } catch {
+    alert('That file did not look like a Gentle Focus export.')
+  }
+  importAllFile.value = ''
+})
+
+document.getElementById('resetAll').addEventListener('click', async () => {
+  if (!confirm('This clears all Gentle Focus data and settings on this device. Continue?')) return
+  await chrome.storage.local.clear()
+  await seedDefaults()
+  location.reload()
 })
 
 renderList()
