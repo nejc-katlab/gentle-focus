@@ -1,3 +1,4 @@
+import { todayKey } from './time.js'
 import { detectType, normalizePattern } from './matcher.js'
 
 const DEFAULTS = {
@@ -5,6 +6,7 @@ const DEFAULTS = {
     budgetMin: 10,
     timerSec: 15,
     expiryWarnSec: 60,
+    dailyCapMin: 0,
     gateTypes: { timer: true, puzzle: true, fact: true },
     surpriseMe: false,
     factDwellSec: 20,
@@ -19,7 +21,9 @@ const DEFAULTS = {
   unlocks: {},
   pause: { expiresAt: 0 },
   overrideLog: [],
-  factsSeen: []
+  factsSeen: [],
+  usageToday: { date: '', sites: {} },
+  timing: { site: null, since: 0 }
 }
 
 function withSettingDefaults(stored) {
@@ -76,4 +80,36 @@ export async function removeBlockEntry(pattern) {
     delete unlocks[pattern]
     await set('unlocks', unlocks)
   }
+}
+
+export async function getUsageToday() {
+  const today = todayKey(new Date())
+  const usage = await get('usageToday')
+  if (usage.date !== today) return { date: today, sites: {} }
+  return usage
+}
+
+export async function addUsageMinutes(site, minutes) {
+  if (!site || !(minutes > 0)) return
+  const usage = await getUsageToday()
+  const entry = usage.sites[site] ?? { minutes: 0, unlocks: 0 }
+  entry.minutes += minutes
+  usage.sites[site] = entry
+  await set('usageToday', usage)
+}
+
+export async function bumpUnlockCount(site) {
+  if (!site) return
+  const usage = await getUsageToday()
+  const entry = usage.sites[site] ?? { minutes: 0, unlocks: 0 }
+  entry.unlocks += 1
+  usage.sites[site] = entry
+  await set('usageToday', usage)
+}
+
+export function effectiveDailyCap(entry, settings) {
+  const perEntry = Number(entry?.dailyCapMin)
+  if (Number.isFinite(perEntry) && perEntry > 0) return perEntry
+  const global = Number(settings?.dailyCapMin)
+  return Number.isFinite(global) && global > 0 ? global : 0
 }

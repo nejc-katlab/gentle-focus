@@ -7,7 +7,7 @@ const listEl = document.getElementById('blocklist')
 const emptyEl = document.getElementById('empty')
 const savedToast = document.getElementById('savedToast')
 
-const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'factDwellSec', 'overrideDefaultMin', 'overrideDelaySec']
+const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'dailyCapMin', 'factDwellSec', 'overrideDefaultMin', 'overrideDelaySec']
 const STRING_FIELDS = ['difficulty']
 const GATE_TYPES = ['timer', 'puzzle', 'fact']
 

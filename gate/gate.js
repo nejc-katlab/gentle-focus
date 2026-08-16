@@ -1,6 +1,6 @@
 import { getPuzzle } from './puzzles/index.js'
-import { get, set } from '../shared/storage.js'
-import { hostFromUrl } from '../shared/matcher.js'
+import { findMatch, hostFromUrl } from '../shared/matcher.js'
+import { get, set, getUsageToday, effectiveDailyCap } from '../shared/storage.js'
 
 const params = new URLSearchParams(location.search)
 const target = params.get('target')
@@ -51,6 +51,17 @@ async function main() {
 
   settings = await get('settings')
   setupOverride()
+
+  const blocklist = await get('blocklist')
+  const match = findMatch(target, blocklist)
+  const usage = await getUsageToday()
+  const cap = effectiveDailyCap(match, settings)
+  const used = match ? (usage.sites[match.pattern]?.minutes ?? 0) : 0
+  if (cap > 0 && used >= cap) {
+    titleEl.textContent = `That's your ${site} time for today`
+    subEl.textContent = `You've used the ${cap} minutes you set aside. The override below is still here if you truly need it.`
+    return
+  }
 
   const enabled = Object.keys(settings.gateTypes).filter(k => settings.gateTypes[k])
   const types = enabled.length ? enabled : ['timer']

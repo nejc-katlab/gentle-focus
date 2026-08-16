@@ -3,7 +3,7 @@
   "name": "Gentle Focus",
   "version": "0.1.0",
   "description": "Gentle friction between you and distracting sites. 100% local, no accounts, no servers.",
-  "permissions": ["storage", "alarms", "webNavigation", "tabs"],
+  "permissions": ["storage", "alarms", "webNavigation", "tabs", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background/service-worker.js",
