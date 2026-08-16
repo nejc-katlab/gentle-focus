@@ -98,7 +98,9 @@ function enableContinue() {
 
 function runDwell(seconds, onDone) {
   dwellEl.hidden = false
-  let remaining = seconds
+  let remaining = Number(seconds)
+  if (!Number.isFinite(remaining) || remaining < 0) remaining = 0
+  remaining = Math.floor(remaining)
   const tick = () => {
     countEl.textContent = remaining > 0 ? String(remaining) : '✓'
     if (remaining > 0) continueBtn.textContent = `Continue in ${remaining}s`
@@ -185,13 +187,20 @@ function setupOverride() {
 let ovTimer
 function openOverride() {
   backdrop.hidden = false
-  let remaining = settings.overrideDelaySec ?? 3
-  ovUnlock.disabled = true
+  let remaining = Number(settings.overrideDelaySec)
+  if (!Number.isFinite(remaining) || remaining < 0) remaining = 3
+  remaining = Math.floor(remaining)
   const tick = () => {
     ovUnlock.textContent = remaining > 0 ? `I understand — unlock (${remaining})` : 'I understand — unlock'
   }
-  tick()
   clearInterval(ovTimer)
+  if (remaining === 0) {
+    ovUnlock.disabled = false
+    tick()
+    return
+  }
+  ovUnlock.disabled = true
+  tick()
   ovTimer = setInterval(() => {
     remaining -= 1
     tick()
