@@ -1,10 +1,14 @@
 import { findMatch } from '../shared/matcher.js'
+import { endOfLocalDay } from '../shared/time.js'
+import { activeSession, effectiveStrictness } from '../shared/sessions.js'
 import { get, set, getAll, seedDefaults, addUsageMinutes, bumpUnlockCount } from '../shared/storage.js'
 
 const GATE_PATH = 'gate/gate.html'
 const EXPIRE_PREFIX = 'expire:'
 const WARN_PREFIX = 'warn:'
 const TICK = 'tick'
+const SESSION_END = 'session-end'
+const PAUSE_END = 'pause-end'
 
 function gateUrl(target, expired) {
   const params = new URLSearchParams({ target })
@@ -46,10 +50,14 @@ async function handleNavigation(details) {
 }
 
 async function grantUnlock(target) {
-  const { settings, blocklist, unlocks } = await getAll()
+  const state = await getAll()
+  const { settings, blocklist, unlocks } = state
   const match = findMatch(target, blocklist)
   if (!match) return null
-  const expiresAt = Date.now() + settings.budgetMin * 60 * 1000
+  const strictness = effectiveStrictness(state, new Date())
+  if (strictness === 'strict') return null
+  const budgetMin = strictness === 'firm' ? Math.max(1, Math.ceil(settings.budgetMin / 2)) : settings.budgetMin
+  const expiresAt = Date.now() + budgetMin * 60 * 1000
   unlocks[match.pattern] = { expiresAt, grantedBy: 'gate' }
   await set('unlocks', unlocks)
   chrome.alarms.create(EXPIRE_PREFIX + match.pattern, { when: expiresAt })
@@ -117,6 +125,58 @@ async function toastInfo(sender) {
   return { message: `${mins} minute${mins === 1 ? '' : 's'} left on ${match.pattern}.` }
 }
 
+async function startSession(durationMin, strictness) {
+  const endsAt = Date.now() + durationMin * 60 * 1000
+  await set('session', { active: true, endsAt, strictness, source: 'manual' })
+  chrome.alarms.create(SESSION_END, { when: endsAt })
+  await updateBadge()
+  return endsAt
+}
+
+async function endSession(notify) {
+  await set('session', { active: false, endsAt: 0, strictness: 'gentle', source: 'manual' })
+  chrome.alarms.clear(SESSION_END)
+  await updateBadge()
+  if (notify) notifySessionEnd()
+}
+
+async function startPause(expiresAt) {
+  await set('pause', { expiresAt })
+  chrome.alarms.create(PAUSE_END, { when: expiresAt })
+  await updateBadge()
+}
+
+async function endPause() {
+  await set('pause', { expiresAt: 0 })
+  chrome.alarms.clear(PAUSE_END)
+  await updateBadge()
+}
+
+function notifySessionEnd() {
+  chrome.notifications.create({
+    type: 'basic',
+    iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+    title: 'Session done — nice work.',
+    message: 'Your focus session has ended.'
+  })
+}
+
+async function updateBadge() {
+  const state = await getAll()
+  const now = new Date()
+  if (Date.now() < (state.pause?.expiresAt ?? 0)) {
+    chrome.action.setBadgeText({ text: '‖' })
+    chrome.action.setBadgeBackgroundColor({ color: '#9a948a' })
+    return
+  }
+  if (activeSession(state, now)) {
+    chrome.action.setBadgeText({ text: '●' })
+    chrome.action.setBadgeBackgroundColor({ color: '#6b8f71' })
+    return
+  }
+  chrome.action.setBadgeText({ text: '' })
+}
+
 async function currentActiveSite() {
   let win
   try {
@@ -148,20 +208,35 @@ async function updateTiming() {
 
 async function reconcile() {
   await seedDefaults()
-  const { unlocks, settings } = await getAll()
+  const state = await getAll()
   const now = Date.now()
+
   let changed = false
-  for (const [pattern, u] of Object.entries(unlocks)) {
+  for (const [pattern, u] of Object.entries(state.unlocks)) {
     if (now >= u.expiresAt) {
-      delete unlocks[pattern]
+      delete state.unlocks[pattern]
       changed = true
     } else {
       chrome.alarms.create(EXPIRE_PREFIX + pattern, { when: u.expiresAt })
-      scheduleWarn(pattern, u.expiresAt, settings.expiryWarnSec)
+      scheduleWarn(pattern, u.expiresAt, state.settings.expiryWarnSec)
     }
   }
-  if (changed) await set('unlocks', unlocks)
+  if (changed) await set('unlocks', state.unlocks)
+
+  if (state.session?.active && now < state.session.endsAt) {
+    chrome.alarms.create(SESSION_END, { when: state.session.endsAt })
+  } else if (state.session?.active) {
+    await set('session', { active: false, endsAt: 0, strictness: 'gentle', source: 'manual' })
+  }
+
+  if (now < (state.pause?.expiresAt ?? 0)) {
+    chrome.alarms.create(PAUSE_END, { when: state.pause.expiresAt })
+  } else if ((state.pause?.expiresAt ?? 0) !== 0) {
+    await set('pause', { expiresAt: 0 })
+  }
+
   chrome.alarms.create(TICK, { periodInMinutes: 1 })
+  await updateBadge()
   updateTiming()
 }
 
@@ -175,18 +250,44 @@ chrome.tabs.onUpdated.addListener((id, info) => {
 chrome.windows.onFocusChanged.addListener(() => updateTiming())
 
 chrome.alarms.onAlarm.addListener(alarm => {
-  if (alarm.name === TICK) updateTiming()
-  else if (alarm.name.startsWith(EXPIRE_PREFIX)) expireUnlock(alarm.name.slice(EXPIRE_PREFIX.length))
-  else if (alarm.name.startsWith(WARN_PREFIX)) warnSite(alarm.name.slice(WARN_PREFIX.length))
+  if (alarm.name === TICK) {
+    updateTiming()
+    updateBadge()
+  } else if (alarm.name === SESSION_END) {
+    get('settings').then(s => endSession(!!s.sessionEndNotify))
+  } else if (alarm.name === PAUSE_END) {
+    endPause()
+  } else if (alarm.name.startsWith(EXPIRE_PREFIX)) {
+    expireUnlock(alarm.name.slice(EXPIRE_PREFIX.length))
+  } else if (alarm.name.startsWith(WARN_PREFIX)) {
+    warnSite(alarm.name.slice(WARN_PREFIX.length))
+  }
 })
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === 'GATE_COMPLETED') {
-    grantUnlock(msg.target).then(expiresAt => sendResponse({ ok: true, expiresAt }))
+    grantUnlock(msg.target).then(expiresAt => sendResponse({ ok: expiresAt !== null, expiresAt }))
     return true
   }
   if (msg?.type === 'OVERRIDE_REQUESTED') {
     grantOverride(msg.target, msg.durationMin).then(expiresAt => sendResponse({ ok: true, expiresAt }))
+    return true
+  }
+  if (msg?.type === 'START_SESSION') {
+    startSession(msg.durationMin, msg.strictness).then(endsAt => sendResponse({ ok: true, endsAt }))
+    return true
+  }
+  if (msg?.type === 'END_SESSION') {
+    endSession(false).then(() => sendResponse({ ok: true }))
+    return true
+  }
+  if (msg?.type === 'PAUSE') {
+    const expiresAt = msg.untilEndOfDay ? endOfLocalDay(new Date()) : Date.now() + msg.durationMin * 60 * 1000
+    startPause(expiresAt).then(() => sendResponse({ ok: true, expiresAt }))
+    return true
+  }
+  if (msg?.type === 'RESUME') {
+    endPause().then(() => sendResponse({ ok: true }))
     return true
   }
   if (msg?.type === 'GET_TOAST_INFO') {

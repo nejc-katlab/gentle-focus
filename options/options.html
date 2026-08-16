@@ -80,6 +80,43 @@
         <input id="overrideDelaySec" type="number" min="0" max="30" step="1">
       </label>
     </section>
+
+    <section class="card">
+      <h2>Focus sessions</h2>
+      <label class="field">
+        <span class="field-label">Default session length (minutes)</span>
+        <input id="sessionDefaultMin" type="number" min="1" max="600" step="1">
+      </label>
+      <label class="field">
+        <span class="field-label">Default strictness</span>
+        <select id="sessionDefaultStrictness">
+          <option value="gentle">Gentle</option>
+          <option value="firm">Firm</option>
+          <option value="strict">Strict</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="sessionEndNotify"> Notify me when a session ends</label>
+
+      <h3 class="sub-h">Schedules</h3>
+      <p class="note">Recurring focus windows. Each window belongs to the day it starts; overnight windows like 22:00–02:00 are fine.</p>
+      <ul id="scheduleList" class="list"></ul>
+      <p class="empty" id="scheduleEmpty" hidden>No schedules yet.</p>
+      <form id="scheduleForm" class="sched-form">
+        <input id="schedName" type="text" placeholder="Name (e.g. Work mornings)" autocomplete="off">
+        <div class="day-row" id="schedDays"></div>
+        <div class="time-row">
+          <input id="schedStart" type="time" value="09:00">
+          <span>to</span>
+          <input id="schedEnd" type="time" value="12:00">
+        </div>
+        <select id="schedStrictness">
+          <option value="gentle">Gentle</option>
+          <option value="firm">Firm</option>
+          <option value="strict">Strict</option>
+        </select>
+        <button type="submit" class="primary">Add schedule</button>
+      </form>
+    </section>
   </main>
 
   <p class="toast" id="savedToast" hidden>Saved</p>

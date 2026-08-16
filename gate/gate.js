@@ -1,4 +1,5 @@
 import { getPuzzle } from './puzzles/index.js'
+import { effectiveStrictness } from '../shared/sessions.js'
 import { findMatch, hostFromUrl } from '../shared/matcher.js'
 import { get, set, getUsageToday, effectiveDailyCap } from '../shared/storage.js'
 
@@ -29,6 +30,10 @@ const TILE_COPY = {
 }
 
 let settings
+let strictness = 'gentle'
+let stepsRequired = 1
+let stepsDone = 0
+let overrideDelaySec = 3
 
 optionsLink.addEventListener('click', e => {
   e.preventDefault()
@@ -50,6 +55,9 @@ async function main() {
     : 'A short pause, then you can continue.'
 
   settings = await get('settings')
+  const [session, schedules] = await Promise.all([get('session'), get('schedules')])
+  strictness = effectiveStrictness({ session, schedules }, new Date())
+  overrideDelaySec = strictness === 'strict' ? 10 : settings.overrideDelaySec
   setupOverride()
 
   const blocklist = await get('blocklist')
@@ -63,12 +71,38 @@ async function main() {
     return
   }
 
+  if (strictness === 'strict') {
+    titleEl.textContent = 'Focus session on'
+    subEl.textContent = 'A strict session is running, so the gate stays closed. The override below is here if you truly need it.'
+    return
+  }
+
+  stepsRequired = strictness === 'firm' ? 2 : 1
+  if (strictness === 'firm' && !expired) {
+    subEl.textContent = 'Focus session on — two quick steps to continue.'
+  }
+  beginSelection()
+}
+
+function beginSelection() {
   const enabled = Object.keys(settings.gateTypes).filter(k => settings.gateTypes[k])
   const types = enabled.length ? enabled : ['timer']
 
   if (settings.surpriseMe) startFriction(types[Math.floor(Math.random() * types.length)])
   else if (types.length === 1) startFriction(types[0])
   else showChooser(types)
+}
+
+function startNextStep() {
+  subEl.textContent = 'One more step.'
+  frictionEl.hidden = true
+  chooserEl.hidden = true
+  chooserEl.innerHTML = ''
+  mountEl.innerHTML = ''
+  dwellEl.hidden = true
+  switchTimerBtn.hidden = true
+  continueBtn.textContent = 'Continue'
+  beginSelection()
 }
 
 function showChooser(types) {
@@ -162,17 +196,22 @@ function runPuzzle() {
   const puzzle = getPuzzle('schulte').generate(settings.difficulty)
   puzzle.mount(mountEl, enableContinue)
   switchTimerBtn.hidden = false
-  switchTimerBtn.addEventListener('click', () => {
+  switchTimerBtn.onclick = () => {
     switchTimerBtn.hidden = true
     mountEl.innerHTML = ''
     continueBtn.disabled = true
     continueBtn.textContent = 'Continue'
     runTimer(settings.timerSec)
-  }, { once: true })
+  }
 }
 
 continueBtn.addEventListener('click', async () => {
   continueBtn.disabled = true
+  stepsDone += 1
+  if (stepsDone < stepsRequired) {
+    startNextStep()
+    return
+  }
   await chrome.runtime.sendMessage({ type: 'GATE_COMPLETED', target })
   location.href = target
 })
@@ -198,7 +237,7 @@ function setupOverride() {
 let ovTimer
 function openOverride() {
   backdrop.hidden = false
-  let remaining = Number(settings.overrideDelaySec)
+  let remaining = Number(overrideDelaySec)
   if (!Number.isFinite(remaining) || remaining < 0) remaining = 3
   remaining = Math.floor(remaining)
   const tick = () => {

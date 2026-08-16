@@ -7,9 +7,20 @@ const listEl = document.getElementById('blocklist')
 const emptyEl = document.getElementById('empty')
 const savedToast = document.getElementById('savedToast')
 
-const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'dailyCapMin', 'factDwellSec', 'overrideDefaultMin', 'overrideDelaySec']
-const STRING_FIELDS = ['difficulty']
+const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'dailyCapMin', 'factDwellSec', 'overrideDefaultMin', 'overrideDelaySec', 'sessionDefaultMin']
+const STRING_FIELDS = ['difficulty', 'sessionDefaultStrictness']
+const CHECK_FIELDS = ['surpriseMe', 'sessionEndNotify']
 const GATE_TYPES = ['timer', 'puzzle', 'fact']
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+const scheduleList = document.getElementById('scheduleList')
+const scheduleEmpty = document.getElementById('scheduleEmpty')
+const scheduleForm = document.getElementById('scheduleForm')
+const schedName = document.getElementById('schedName')
+const schedDays = document.getElementById('schedDays')
+const schedStart = document.getElementById('schedStart')
+const schedEnd = document.getElementById('schedEnd')
+const schedStrictness = document.getElementById('schedStrictness')
 
 async function renderList() {
   const blocklist = await get('blocklist')
@@ -63,7 +74,9 @@ async function loadSettings() {
   for (const key of [...NUMBER_FIELDS, ...STRING_FIELDS]) {
     document.getElementById(key).value = settings[key]
   }
-  document.getElementById('surpriseMe').checked = settings.surpriseMe
+  for (const key of CHECK_FIELDS) {
+    document.getElementById(key).checked = !!settings[key]
+  }
   for (const type of GATE_TYPES) {
     document.getElementById(`gt-${type}`).checked = !!settings.gateTypes[type]
   }
@@ -85,7 +98,9 @@ async function saveSettings() {
   for (const key of STRING_FIELDS) {
     settings[key] = document.getElementById(key).value
   }
-  settings.surpriseMe = document.getElementById('surpriseMe').checked
+  for (const key of CHECK_FIELDS) {
+    settings[key] = document.getElementById(key).checked
+  }
   settings.gateTypes = {}
   for (const type of GATE_TYPES) {
     settings.gateTypes[type] = document.getElementById(`gt-${type}`).checked
@@ -95,12 +110,96 @@ async function saveSettings() {
 }
 
 function wireSettings() {
-  const ids = [...NUMBER_FIELDS, ...STRING_FIELDS, 'surpriseMe', ...GATE_TYPES.map(t => `gt-${t}`)]
+  const ids = [...NUMBER_FIELDS, ...STRING_FIELDS, ...CHECK_FIELDS, ...GATE_TYPES.map(t => `gt-${t}`)]
   for (const id of ids) {
     document.getElementById(id).addEventListener('change', saveSettings)
   }
 }
 
+function buildDayPickers() {
+  for (let i = 0; i < DAY_LABELS.length; i++) {
+    const label = document.createElement('label')
+    label.className = 'day'
+    const cb = document.createElement('input')
+    cb.type = 'checkbox'
+    cb.value = String(i)
+    label.append(cb, document.createTextNode(DAY_LABELS[i]))
+    schedDays.appendChild(label)
+  }
+}
+
+async function updateSchedule(id, patch) {
+  const schedules = await get('schedules')
+  await set('schedules', schedules.map(s => (s.id === id ? { ...s, ...patch } : s)))
+  flashSaved()
+}
+
+async function removeSchedule(id) {
+  const schedules = await get('schedules')
+  await set('schedules', schedules.filter(s => s.id !== id))
+}
+
+async function renderSchedules() {
+  const schedules = await get('schedules')
+  scheduleList.innerHTML = ''
+  scheduleEmpty.hidden = schedules.length > 0
+  for (const s of schedules) {
+    const li = document.createElement('li')
+
+    const info = document.createElement('span')
+    info.className = 'pattern'
+    info.textContent = s.name || '(unnamed)'
+    const meta = document.createElement('span')
+    meta.className = 'type-tag'
+    const days = (s.days ?? []).map(d => DAY_LABELS[d]).join(' ') || 'no days'
+    meta.textContent = `${days} · ${s.start}–${s.end} · ${s.strictness}`
+    info.appendChild(meta)
+
+    const toggle = document.createElement('input')
+    toggle.type = 'checkbox'
+    toggle.checked = !!s.enabled
+    toggle.addEventListener('change', () => updateSchedule(s.id, { enabled: toggle.checked }))
+
+    const remove = document.createElement('button')
+    remove.className = 'remove'
+    remove.textContent = 'Remove'
+    remove.addEventListener('click', async () => {
+      await removeSchedule(s.id)
+      renderSchedules()
+    })
+
+    const actions = document.createElement('div')
+    actions.className = 'sched-actions'
+    actions.append(toggle, remove)
+
+    li.append(info, actions)
+    scheduleList.appendChild(li)
+  }
+}
+
+scheduleForm.addEventListener('submit', async e => {
+  e.preventDefault()
+  const days = [...schedDays.querySelectorAll('input:checked')].map(cb => Number(cb.value))
+  const schedule = {
+    id: crypto.randomUUID(),
+    name: schedName.value.trim(),
+    enabled: true,
+    strictness: schedStrictness.value,
+    days,
+    start: schedStart.value,
+    end: schedEnd.value
+  }
+  const schedules = await get('schedules')
+  schedules.push(schedule)
+  await set('schedules', schedules)
+  schedName.value = ''
+  for (const cb of schedDays.querySelectorAll('input:checked')) cb.checked = false
+  renderSchedules()
+  flashSaved()
+})
+
 renderList()
 loadSettings()
 wireSettings()
+buildDayPickers()
+renderSchedules()

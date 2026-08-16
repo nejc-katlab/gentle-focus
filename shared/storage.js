@@ -12,7 +12,10 @@ const DEFAULTS = {
     factDwellSec: 20,
     difficulty: 'medium',
     overrideDefaultMin: 15,
-    overrideDelaySec: 3
+    overrideDelaySec: 3,
+    sessionDefaultMin: 25,
+    sessionDefaultStrictness: 'gentle',
+    sessionEndNotify: true
   },
   blocklist: [
     { pattern: 'reddit.com', type: 'domain' },
@@ -20,6 +23,8 @@ const DEFAULTS = {
   ],
   unlocks: {},
   pause: { expiresAt: 0 },
+  session: { active: false, endsAt: 0, strictness: 'gentle', source: 'manual' },
+  schedules: [],
   overrideLog: [],
   factsSeen: [],
   usageToday: { date: '', sites: {} },

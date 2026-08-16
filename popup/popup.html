@@ -10,8 +10,58 @@
     <p class="eyebrow">Gentle Focus</p>
     <p class="status" id="status">Active</p>
     <p class="hint" id="hint"></p>
+
     <button id="blockBtn" class="primary" hidden></button>
-    <button id="optionsBtn" class="ghost">Settings</button>
+
+    <div class="panel" id="sessionPanel">
+      <div id="sessionIdle">
+        <button id="startSessionToggle" class="ghost">Start focus session</button>
+        <div id="sessionForm" class="form" hidden>
+          <div class="chips" id="sessionChips">
+            <button type="button" class="chip" data-min="25">25 min</button>
+            <button type="button" class="chip" data-min="50">50 min</button>
+            <button type="button" class="chip" data-min="90">90 min</button>
+          </div>
+          <input id="sessionCustom" type="number" min="1" max="600" placeholder="Custom minutes">
+          <select id="sessionStrictness">
+            <option value="gentle">Gentle — normal gates</option>
+            <option value="firm">Firm — two steps, half the time</option>
+            <option value="strict">Strict — override only</option>
+          </select>
+          <button id="startSessionBtn" class="primary">Start session</button>
+        </div>
+      </div>
+      <div id="sessionActive" hidden>
+        <p class="panel-status" id="sessionStatus"></p>
+        <button id="endSessionBtn" class="ghost">End session</button>
+      </div>
+    </div>
+
+    <div class="panel" id="pausePanel">
+      <div id="pauseIdle">
+        <button id="pauseToggle" class="ghost">Pause everything</button>
+        <div id="pauseForm" class="form" hidden>
+          <div class="chips" id="pauseChips">
+            <button type="button" class="chip" data-min="5">5 min</button>
+            <button type="button" class="chip" data-min="10">10 min</button>
+            <button type="button" class="chip" data-min="30">30 min</button>
+            <button type="button" class="chip" data-eod="1">End of day</button>
+          </div>
+          <input id="pauseCustom" type="number" min="1" max="1440" placeholder="Custom minutes">
+          <div id="strictConfirm" hidden>
+            <p class="confirm-note">A strict session is on. To pause, type: <em id="confirmSentence"></em></p>
+            <input id="confirmInput" type="text" placeholder="Type the sentence" autocomplete="off">
+          </div>
+          <button id="pauseBtn" class="primary">Pause</button>
+        </div>
+      </div>
+      <div id="pauseActive" hidden>
+        <p class="panel-status" id="pauseStatus"></p>
+        <button id="resumeBtn" class="ghost">Resume now</button>
+      </div>
+    </div>
+
+    <button id="optionsBtn" class="quiet-btn">Settings</button>
   </div>
   <script type="module" src="popup.js"></script>
 </body>

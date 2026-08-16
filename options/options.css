@@ -231,3 +231,65 @@ select {
   font-weight: 600;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
+
+.sub-h {
+  margin: 24px 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sched-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.day-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.day {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--ring);
+  border-radius: 999px;
+  background: var(--field);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.day input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.time-row input {
+  width: auto;
+  flex: 1;
+}
+
+.sched-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sched-actions input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
