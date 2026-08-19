@@ -9,7 +9,7 @@ const DEFAULTS = {
     dailyCapMin: 0,
     gateTypes: { timer: true, puzzle: true, fact: true },
     surpriseMe: false,
-    factDwellSec: 20,
+    factDwellSec: 60,
     difficulty: 'medium',
     overrideDefaultMin: 15,
     overrideDelaySec: 3,

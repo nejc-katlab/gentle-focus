@@ -160,7 +160,6 @@ function runDwell(seconds, onDone) {
   remaining = Math.floor(remaining)
   const tick = () => {
     countEl.textContent = remaining > 0 ? String(remaining) : '✓'
-    if (remaining > 0) continueBtn.textContent = `Continue in ${remaining}s`
   }
   tick()
   const iv = setInterval(() => {
@@ -173,8 +172,32 @@ function runDwell(seconds, onDone) {
   }, 1000)
 }
 
-function runTimer(sec) {
-  runDwell(sec ?? 15, enableContinue)
+async function runTimer(sec) {
+  await showQuote()
+  dwellEl.classList.add('breathing')
+  runDwell(sec ?? 15, () => {
+    dwellEl.classList.remove('breathing')
+    enableContinue()
+  })
+}
+
+async function showQuote() {
+  try {
+    const res = await fetch(chrome.runtime.getURL('data/quotes.json'))
+    const quotes = await res.json()
+    const quote = quotes[Math.floor(Math.random() * quotes.length)]
+    mountEl.innerHTML = ''
+    const text = document.createElement('p')
+    text.className = 'quote'
+    text.textContent = `“${quote.text}”`
+    mountEl.append(text)
+    if (quote.author) {
+      const author = document.createElement('p')
+      author.className = 'quote-author'
+      author.textContent = `— ${quote.author}`
+      mountEl.append(author)
+    }
+  } catch {}
 }
 
 async function runFact() {
