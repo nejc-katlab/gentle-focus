@@ -318,6 +318,49 @@ h1 {
   cursor: default;
 }
 
+.lights {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: var(--sp-2);
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.lights-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--ring);
+  border-radius: var(--r-sm);
+  background: var(--field);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.lights-cell:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.lights-cell.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.lights-cell.on::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  transform: translate(-50%, -50%);
+}
+
+.lights-cell:disabled {
+  cursor: default;
+}
+
 .primary {
   width: 100%;
   padding: var(--sp-4) 20px;

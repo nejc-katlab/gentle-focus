@@ -1,8 +1,9 @@
 import slide from './slide.js'
+import lights from './lights.js'
 import schulte from './schulte.js'
 import unscramble from './unscramble.js'
 
-export const puzzles = [schulte, unscramble, slide]
+export const puzzles = [schulte, unscramble, slide, lights]
 
 export function getPuzzle(id) {
   return puzzles.find(p => p.id === id) ?? puzzles[0]

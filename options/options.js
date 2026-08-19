@@ -11,7 +11,7 @@ const NUMBER_FIELDS = ['budgetMin', 'timerSec', 'expiryWarnSec', 'dailyCapMin', 
 const STRING_FIELDS = ['difficulty', 'sessionDefaultStrictness', 'tone']
 const CHECK_FIELDS = ['surpriseMe', 'sessionEndNotify', 'showStatsOnGate']
 const GATE_TYPES = ['timer', 'puzzle', 'fact']
-const PUZZLE_MODULES = ['schulte', 'unscramble', 'slide']
+const PUZZLE_MODULES = ['schulte', 'unscramble', 'slide', 'lights']
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const scheduleList = document.getElementById('scheduleList')
