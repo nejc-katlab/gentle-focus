@@ -4,6 +4,11 @@ const MESSAGES = {
     neutral: s => `Pause before ${s}`,
     minimal: s => s
   },
+  gateHeaderLead: {
+    encouraging: 'Taking a moment before',
+    neutral: 'Pause before',
+    minimal: ''
+  },
   gateSubDefault: {
     encouraging: 'A short pause, then you can continue.',
     neutral: 'Complete a step to continue.',

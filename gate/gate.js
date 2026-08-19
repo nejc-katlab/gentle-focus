@@ -56,7 +56,7 @@ async function main() {
   settings = await get('settings')
   tone = settings.tone ?? 'encouraging'
   const site = hostFromUrl(target) || 'this site'
-  titleEl.textContent = msg('gateHeader', tone, site)
+  renderHeader(site)
   subEl.textContent = expired ? msg('gateSubExpired', tone) : msg('gateSubDefault', tone)
 
   const [session, schedules] = await Promise.all([get('session'), get('schedules')])
@@ -85,6 +85,16 @@ async function main() {
   stepsRequired = strictness === 'firm' ? 2 : 1
   if (strictness === 'firm' && !expired) subEl.textContent = msg('firmTwoSteps', tone)
   beginSelection()
+}
+
+function renderHeader(site) {
+  const lead = msg('gateHeaderLead', tone)
+  titleEl.textContent = ''
+  if (lead) titleEl.append(`${lead} `)
+  const siteEl = document.createElement('span')
+  siteEl.className = 'site-name'
+  siteEl.textContent = site
+  titleEl.append(siteEl)
 }
 
 async function showStatLine() {
