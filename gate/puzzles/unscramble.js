@@ -34,6 +34,7 @@ export default {
         el.innerHTML = ''
         const status = document.createElement('p')
         status.className = 'puzzle-status'
+        status.setAttribute('role', 'status')
         status.textContent = 'Loading…'
         el.appendChild(status)
 

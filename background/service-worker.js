@@ -217,6 +217,19 @@ async function updateTiming() {
   await set('timing', site ? { site, since: Date.now() } : { site: null, since: 0 })
 }
 
+async function reGateOpenTabs() {
+  if (await isPaused()) return
+  const { blocklist } = await getAll()
+  const tabs = await chrome.tabs.query({})
+  for (const tab of tabs) {
+    if (!tab.id || !tab.url || !isHttp(tab.url)) continue
+    const match = findMatch(tab.url, blocklist)
+    if (!match) continue
+    if (await activeUnlock(match.pattern)) continue
+    chrome.tabs.update(tab.id, { url: gateUrl(tab.url) })
+  }
+}
+
 async function reconcile() {
   await seedDefaults()
   const state = await getAll()
@@ -249,6 +262,7 @@ async function reconcile() {
   chrome.alarms.create(TICK, { periodInMinutes: 1 })
   await updateBadge()
   updateTiming()
+  reGateOpenTabs()
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener(handleNavigation)

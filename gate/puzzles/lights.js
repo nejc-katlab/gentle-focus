@@ -43,6 +43,7 @@ export default {
         el.innerHTML = ''
         const status = document.createElement('p')
         status.className = 'puzzle-status'
+        status.setAttribute('role', 'status')
         status.textContent = 'Turn every light off. A tap flips a tile and its neighbors.'
 
         const gridEl = document.createElement('div')

@@ -27,6 +27,7 @@ export default {
         el.innerHTML = ''
         const status = document.createElement('p')
         status.className = 'puzzle-status'
+        status.setAttribute('role', 'status')
         status.textContent = 'Tap the numbers in order, starting at 1.'
 
         const grid = document.createElement('div')

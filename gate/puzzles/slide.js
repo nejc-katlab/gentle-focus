@@ -54,6 +54,7 @@ export default {
         el.innerHTML = ''
         const status = document.createElement('p')
         status.className = 'puzzle-status'
+        status.setAttribute('role', 'status')
         status.textContent = 'Slide the tiles into order, blank last.'
 
         const grid = document.createElement('div')

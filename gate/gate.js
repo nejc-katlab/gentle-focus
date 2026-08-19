@@ -146,6 +146,7 @@ function showChooser(types) {
     })
     chooserEl.appendChild(tile)
   }
+  chooserEl.firstElementChild?.focus()
 }
 
 function startFriction(type) {
@@ -273,6 +274,7 @@ function setupOverride() {
   backdrop.addEventListener('click', e => {
     if (e.target === backdrop) closeOverride()
   })
+  backdrop.addEventListener('keydown', trapFocus)
   ovUnlock.addEventListener('click', async () => {
     ovUnlock.disabled = true
     const durationMin = Number(ovDuration.value)
@@ -282,8 +284,27 @@ function setupOverride() {
 }
 
 let ovTimer
+let lastFocused = null
+
+function trapFocus(e) {
+  if (e.key !== 'Tab') return
+  const focusables = [ovDuration, ovBack, ovUnlock].filter(el => !el.disabled)
+  if (!focusables.length) return
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
+
 function openOverride() {
+  lastFocused = document.activeElement
   backdrop.hidden = false
+  ovBack.focus()
   let remaining = Number(overrideDelaySec)
   if (!Number.isFinite(remaining) || remaining < 0) remaining = 3
   remaining = Math.floor(remaining)
@@ -311,6 +332,7 @@ function openOverride() {
 function closeOverride() {
   backdrop.hidden = true
   clearInterval(ovTimer)
+  if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus()
 }
 
 document.addEventListener('keydown', e => {

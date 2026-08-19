@@ -59,3 +59,18 @@ test('findMatch respects path entries alongside domain entries', () => {
   assert.equal(findMatch('https://youtube.com/shorts/abc', blocklist)?.pattern, 'youtube.com/shorts/*')
   assert.equal(findMatch('https://youtube.com/watch?v=abc', blocklist), null)
 })
+
+test('findMatch never matches non-web pages (extension, chrome, about)', () => {
+  const blocklist = [
+    { pattern: 'reddit.com', type: 'domain' },
+    { pattern: 'youtube.com/shorts/*', type: 'path' }
+  ]
+  assert.equal(findMatch('chrome://extensions', blocklist), null)
+  assert.equal(findMatch('chrome-extension://abcdef/gate/gate.html?target=x', blocklist), null)
+  assert.equal(findMatch('about:blank', blocklist), null)
+})
+
+test('path globs match regardless of query string', () => {
+  const blocklist = [{ pattern: 'youtube.com/shorts/*', type: 'path' }]
+  assert.equal(findMatch('https://www.youtube.com/shorts/abc?feature=share', blocklist)?.pattern, 'youtube.com/shorts/*')
+})
