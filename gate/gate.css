@@ -12,15 +12,14 @@ body {
 .card {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
   background: var(--card);
   border: 1px solid var(--ring);
-  border-top: 3px solid var(--accent);
   border-radius: var(--r-lg);
-  padding: var(--sp-7) 40px;
+  padding: 56px 44px;
   text-align: center;
   box-shadow: var(--shadow-card);
-  animation: card-in 400ms ease-out both;
+  animation: card-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes card-in {
@@ -59,12 +58,11 @@ body {
 }
 
 h1 {
-  margin: 0 0 var(--sp-2);
+  margin: 0 0 var(--sp-3);
   font-family: var(--font-serif);
   font-size: var(--fs-xl);
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .site-name {
@@ -82,10 +80,10 @@ h1 {
 
 .sub {
   margin: 0 auto var(--sp-6);
-  max-width: 36ch;
+  max-width: 34ch;
   color: var(--muted);
   font-size: var(--fs-body);
-  line-height: 1.55;
+  line-height: 1.65;
 }
 
 .gate-stat {
@@ -104,20 +102,24 @@ h1 {
   display: block;
   width: 100%;
   text-align: left;
-  padding: var(--sp-4) 18px;
-  border: 1px solid var(--ring);
+  padding: 18px 22px;
+  border: 1px solid transparent;
   border-radius: var(--r-md);
   background: var(--field);
   color: var(--ink);
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease;
+  box-shadow: var(--shadow-card);
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  transform-origin: top center;
+  animation: tile-unfold 560ms cubic-bezier(0.22, 1.15, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 90ms);
 }
 
 .tile:hover,
 .tile:focus-visible {
+  transform: translateY(-2px);
   border-color: var(--accent);
   background: var(--accent-soft);
-  outline: none;
 }
 
 .tile-name {
@@ -131,6 +133,20 @@ h1 {
   display: block;
   font-size: var(--fs-sm);
   color: var(--muted);
+}
+
+@keyframes tile-unfold {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-14px - var(--i, 0) * 8px)) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .mount {
@@ -365,13 +381,17 @@ h1 {
   width: 100%;
   padding: var(--sp-4) 20px;
   border: none;
-  border-radius: var(--r-md);
+  border-radius: var(--r-pill);
   background: var(--accent-strong);
   color: var(--accent-ink);
   font-size: var(--fs-md);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 240ms ease;
+  transition: opacity 240ms ease, transform 160ms ease;
+}
+
+.primary:not(:disabled):hover {
+  transform: translateY(-1px);
 }
 
 .primary:disabled {
@@ -473,7 +493,7 @@ h1 {
   width: 100%;
   padding: 13px 20px;
   border: 1px solid var(--ring);
-  border-radius: var(--r-md);
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--ink);
   font-size: var(--fs-body);

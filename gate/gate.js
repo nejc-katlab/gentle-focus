@@ -28,9 +28,11 @@ const ovUnlock = document.getElementById('ovUnlock')
 
 const TILE_COPY = {
   timer: { name: 'Wait a timer', desc: 'A short, calm pause.' },
-  puzzle: { name: 'Solve a quick puzzle', desc: 'Find the numbers in order.' },
+  puzzle: { name: 'Solve a quick puzzle', desc: 'A quick game to shift gears.' },
   fact: { name: 'Read a fun fact', desc: 'Learn something, then carry on.' }
 }
+
+const CHOOSER_DELAY_MS = 2000
 
 let settings
 let tone = 'encouraging'
@@ -127,12 +129,14 @@ function startNextStep() {
 }
 
 function showChooser(types) {
-  chooserEl.hidden = false
-  for (const type of types) {
+  chooserEl.className = 'chooser'
+  chooserEl.innerHTML = ''
+  types.forEach((type, i) => {
     const copy = TILE_COPY[type]
     const tile = document.createElement('button')
     tile.type = 'button'
     tile.className = 'tile'
+    tile.style.setProperty('--i', String(i))
     const name = document.createElement('span')
     name.className = 'tile-name'
     name.textContent = copy.name
@@ -145,8 +149,12 @@ function showChooser(types) {
       startFriction(type)
     })
     chooserEl.appendChild(tile)
-  }
-  chooserEl.firstElementChild?.focus()
+  })
+
+  setTimeout(() => {
+    chooserEl.hidden = false
+    chooserEl.firstElementChild?.focus()
+  }, CHOOSER_DELAY_MS)
 }
 
 function startFriction(type) {
