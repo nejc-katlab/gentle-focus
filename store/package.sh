@@ -8,7 +8,7 @@ mkdir -p dist
 zip -r -q dist/gentle-focus.zip \
   manifest.json \
   background gate content options popup stats shared data icons \
-  -x '*/harness.html' -x '*.test.js' -x '*/.DS_Store'
+  -x '*/harness.html' -x '*/preview.html' -x '*.test.js' -x '*/.DS_Store'
 
 echo "Built dist/gentle-focus.zip"
 echo "Contents:"

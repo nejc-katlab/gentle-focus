@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — gate preview</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="gate.css">
+  <style>
+    .preview-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      font: 500 12px system-ui, sans-serif;
+    }
+    .preview-bar a {
+      color: #fff;
+      text-decoration: none;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .preview-bar a.on {
+      background: #6b8f71;
+      border-color: #6b8f71;
+    }
+    .preview-bar span { color: rgba(255,255,255,0.6); margin-right: 6px; }
+  </style>
+  <script>
+    const q = new URLSearchParams(location.search)
+    const gate = q.get('gate') || 'chooser'
+    const puzzle = q.get('puzzle') || 'schulte'
+    const gateTypes = gate === 'chooser'
+      ? { timer: true, puzzle: true, fact: true }
+      : { timer: gate === 'timer', puzzle: gate === 'puzzle', fact: gate === 'fact' }
+    window.chrome = {
+      storage: { local: {
+        _d: {
+          settings: {
+            budgetMin: 10, timerSec: 15, expiryWarnSec: 60, dailyCapMin: 0,
+            gateTypes, surpriseMe: false, factDwellSec: 60, difficulty: 'medium',
+            overrideDefaultMin: 15, overrideDelaySec: 3,
+            sessionDefaultMin: 25, sessionDefaultStrictness: 'gentle', sessionEndNotify: true,
+            tone: 'encouraging', showStatsOnGate: true,
+            puzzleModules: { schulte: puzzle === 'schulte', unscramble: puzzle === 'unscramble', slide: puzzle === 'slide', lights: puzzle === 'lights' }
+          },
+          blocklist: [{ pattern: 'reddit.com', type: 'domain' }],
+          session: { active: false, endsAt: 0, strictness: 'gentle', source: 'manual' },
+          schedules: [], usageToday: { date: '', sites: {} }, factsSeen: [], overrideLog: [],
+          stats: { gatesPassed: 0, frictionCounts: {}, history: {}, installedOn: '2026-08-10' }
+        },
+        get(keys){ const l=Array.isArray(keys)?keys:[keys]; const o={}; for(const k of l)o[k]=this._d[k]; return Promise.resolve(o) },
+        set(obj){ Object.assign(this._d,obj); return Promise.resolve() }
+      } },
+      runtime: { getURL: p => '../' + p, sendMessage: () => Promise.resolve({ ok: true }), openOptionsPage() {} }
+    }
+  </script>
+</head>
+<body>
+  <script type="module">
+    const gate = new URLSearchParams(location.search).get('gate') || 'chooser'
+    const target = 'https://www.reddit.com/r/all'
+    const html = await (await fetch('./gate.html')).text()
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    document.body.innerHTML = doc.body.innerHTML
+    document.querySelectorAll('body > script').forEach(s => s.remove())
+
+    const bar = document.createElement('div')
+    bar.className = 'preview-bar'
+    const scenarios = ['chooser', 'timer', 'puzzle', 'fact']
+    bar.innerHTML = '<span>preview:</span>' +
+      scenarios.map(s => `<a href="?gate=${s}" class="${s === gate ? 'on' : ''}">${s}</a>`).join('') +
+      `<a href="?gate=${gate}&_=${Date.now()}">↻ replay</a>`
+    document.body.prepend(bar)
+
+    history.replaceState(null, '', `?gate=${gate}&target=${encodeURIComponent(target)}`)
+    await import(`./gate.js?ts=${Date.now()}`)
+  </script>
+</body>
+</html>
