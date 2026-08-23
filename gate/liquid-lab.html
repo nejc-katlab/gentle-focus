@@ -12,111 +12,96 @@
       background: var(--bg);
       color: var(--ink);
       font-family: var(--font);
-      padding: 40px 24px 80px;
+      display: grid;
+      place-items: center;
+      padding: 40px 24px;
     }
-    h1 { font-family: var(--font-serif); font-weight: 500; font-size: 26px; text-align: center; margin: 0 0 6px; }
-    .lede { text-align: center; color: var(--muted); font-size: 14px; margin: 0 0 40px; }
-    .grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
-    .cell {
-      width: 300px;
-      background: var(--card);
-      border: 1px solid var(--ring);
-      border-radius: var(--r-lg);
-      padding: 24px;
-      text-align: center;
-      box-shadow: var(--shadow-card);
-    }
-    .cell h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
-    .cell p { font-size: 12px; color: var(--muted); margin: 0 0 16px; line-height: 1.5; }
-    .stage { height: 240px; display: grid; place-items: center; }
-    svg { display: block; }
+    .wrap { text-align: center; }
+    h1 { font-family: var(--font-serif); font-weight: 500; font-size: 26px; margin: 0 0 6px; }
+    .lede { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+    .orb { display: block; margin: 0 auto; }
     .blob { fill: var(--accent); }
-    .goo-svg { filter: none; }
+    .controls { margin-top: 28px; font-size: 13px; color: var(--muted); }
+    .controls button {
+      font: inherit; color: var(--ink); background: var(--field);
+      border: 1px solid var(--ring); border-radius: 999px;
+      padding: 6px 14px; margin: 0 4px; cursor: pointer;
+    }
+    .controls button.on { background: var(--accent-soft); border-color: var(--accent); }
   </style>
 </head>
 <body>
-  <h1>Liquid effect lab</h1>
-  <p class="lede">Three real liquid techniques, exaggerated. Which feeling is right?</p>
+  <div class="wrap">
+    <h1>Lava-lamp metaballs</h1>
+    <p class="lede">Smooth, continuous motion (sine-driven, no keyframe snapping).</p>
 
-  <div class="grid">
+    <svg class="orb" width="280" height="280" viewBox="0 0 280 280" aria-hidden="true">
+      <defs>
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur"/>
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"/>
+        </filter>
+      </defs>
+      <g id="balls" filter="url(#goo)"></g>
+    </svg>
 
-    <div class="cell">
-      <h2>A · Gooey metaballs</h2>
-      <p>Soft shapes, blurred, then the alpha is thresholded — so droplets merge and stretch apart like mercury. This is "breathing" made liquid.</p>
-      <div class="stage">
-        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
-          <defs>
-            <filter id="goo">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
-              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -11"/>
-            </filter>
-          </defs>
-          <g filter="url(#goo)">
-            <circle class="blob" cx="110" cy="110" r="42">
-              <animate attributeName="r" values="42;50;42" dur="6s" repeatCount="indefinite"/>
-            </circle>
-            <circle class="blob" cx="110" cy="110" r="22">
-              <animateTransform attributeName="transform" type="translate" values="0 0; 46 -34; -26 44; 0 0" dur="8s" repeatCount="indefinite"/>
-            </circle>
-            <circle class="blob" cx="110" cy="110" r="18">
-              <animateTransform attributeName="transform" type="translate" values="0 0; -50 22; 34 -40; 0 0" dur="10s" repeatCount="indefinite"/>
-            </circle>
-            <circle class="blob" cx="110" cy="110" r="14">
-              <animateTransform attributeName="transform" type="translate" values="0 0; 28 50; -46 -24; 0 0" dur="7.5s" repeatCount="indefinite"/>
-            </circle>
-          </g>
-        </svg>
-      </div>
+    <div class="controls">
+      speed:
+      <button data-speed="0.6" class="on">calm</button>
+      <button data-speed="1">medium</button>
+      <button data-speed="1.6">lively</button>
     </div>
-
-    <div class="cell">
-      <h2>B · Noise displacement</h2>
-      <p>A Perlin-noise map warps the shape's edges (feTurbulence + feDisplacementMap), animated — so the surface ripples and wobbles like water.</p>
-      <div class="stage">
-        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
-          <defs>
-            <filter id="liquid" x="-30%" y="-30%" width="160%" height="160%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="7" result="n">
-                <animate attributeName="baseFrequency" dur="14s" values="0.014;0.026;0.014" repeatCount="indefinite"/>
-              </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n" scale="34"/>
-            </filter>
-          </defs>
-          <circle class="blob" cx="110" cy="110" r="66" filter="url(#liquid)"/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="cell">
-      <h2>C · Both together</h2>
-      <p>Metaballs merged, then noise-warped — the richest "living liquid." Slower and smaller amplitude would make it calm.</p>
-      <div class="stage">
-        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
-          <defs>
-            <filter id="both" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
-              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/>
-              <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4" result="n">
-                <animate attributeName="baseFrequency" dur="16s" values="0.02;0.032;0.02" repeatCount="indefinite"/>
-              </feTurbulence>
-              <feDisplacementMap in="goo" in2="n" scale="22"/>
-            </filter>
-          </defs>
-          <g filter="url(#both)">
-            <circle class="blob" cx="110" cy="110" r="40">
-              <animate attributeName="r" values="40;48;40" dur="7s" repeatCount="indefinite"/>
-            </circle>
-            <circle class="blob" cx="110" cy="110" r="20">
-              <animateTransform attributeName="transform" type="translate" values="0 0; 44 -28; -30 40; 0 0" dur="9s" repeatCount="indefinite"/>
-            </circle>
-            <circle class="blob" cx="110" cy="110" r="16">
-              <animateTransform attributeName="transform" type="translate" values="0 0; -46 26; 32 -38; 0 0" dur="11s" repeatCount="indefinite"/>
-            </circle>
-          </g>
-        </svg>
-      </div>
-    </div>
-
   </div>
+
+  <script>
+    const CX = 140, CY = 140
+    // Each blob wanders via two summed sines per axis (incommensurate freqs => organic,
+    // no visible loop), with a gentle radius pulse. Vertical amplitude biased for lava feel.
+    const blobs = [
+      { r: 46, rp: 5,  ax: [8, 5],   ay: [10, 6],  wx: [0.05, 0.08], wy: [0.04, 0.07], px: [0, 2.1], py: [1.0, 3.3], wr: 0.06 },
+      { r: 22, rp: 4,  ax: [22, 10], ay: [40, 16], wx: [0.11, 0.17], wy: [0.08, 0.13], px: [0.5, 4], py: [2, 5.2], wr: 0.12 },
+      { r: 18, rp: 4,  ax: [30, 12], ay: [46, 14], wx: [0.09, 0.15], wy: [0.065, 0.12], px: [3, 1], py: [0.4, 2.6], wr: 0.1 },
+      { r: 14, rp: 3,  ax: [26, 14], ay: [52, 18], wx: [0.13, 0.19], wy: [0.07, 0.11], px: [1.7, 5], py: [4, 0.9], wr: 0.14 }
+    ]
+
+    const g = document.getElementById('balls')
+    const nodes = blobs.map(() => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      c.setAttribute('class', 'blob')
+      g.appendChild(c)
+      return c
+    })
+
+    let speed = 0.6
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    function place(t) {
+      blobs.forEach((b, i) => {
+        const cx = CX + b.ax[0] * Math.sin(b.wx[0] * t + b.px[0]) + b.ax[1] * Math.sin(b.wx[1] * t + b.px[1])
+        const cy = CY + b.ay[0] * Math.sin(b.wy[0] * t + b.py[0]) + b.ay[1] * Math.sin(b.wy[1] * t + b.py[1])
+        const r = b.r + b.rp * Math.sin(b.wr * t)
+        nodes[i].setAttribute('cx', cx.toFixed(2))
+        nodes[i].setAttribute('cy', cy.toFixed(2))
+        nodes[i].setAttribute('r', Math.max(2, r).toFixed(2))
+      })
+    }
+
+    place(0)
+    if (!reduce) {
+      const start = performance.now()
+      function frame(now) {
+        place(((now - start) / 1000) * speed)
+        requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    }
+
+    document.querySelectorAll('.controls button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        speed = Number(btn.dataset.speed)
+        document.querySelectorAll('.controls button').forEach(b => b.classList.toggle('on', b === btn))
+      })
+    })
+  </script>
 </body>
 </html>
