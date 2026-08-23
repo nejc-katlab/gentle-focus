@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — liquid lab</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      padding: 40px 24px 80px;
+    }
+    h1 { font-family: var(--font-serif); font-weight: 500; font-size: 26px; text-align: center; margin: 0 0 6px; }
+    .lede { text-align: center; color: var(--muted); font-size: 14px; margin: 0 0 40px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+    .cell {
+      width: 300px;
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .cell h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+    .cell p { font-size: 12px; color: var(--muted); margin: 0 0 16px; line-height: 1.5; }
+    .stage { height: 240px; display: grid; place-items: center; }
+    svg { display: block; }
+    .blob { fill: var(--accent); }
+    .goo-svg { filter: none; }
+  </style>
+</head>
+<body>
+  <h1>Liquid effect lab</h1>
+  <p class="lede">Three real liquid techniques, exaggerated. Which feeling is right?</p>
+
+  <div class="grid">
+
+    <div class="cell">
+      <h2>A · Gooey metaballs</h2>
+      <p>Soft shapes, blurred, then the alpha is thresholded — so droplets merge and stretch apart like mercury. This is "breathing" made liquid.</p>
+      <div class="stage">
+        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+          <defs>
+            <filter id="goo">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -11"/>
+            </filter>
+          </defs>
+          <g filter="url(#goo)">
+            <circle class="blob" cx="110" cy="110" r="42">
+              <animate attributeName="r" values="42;50;42" dur="6s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="blob" cx="110" cy="110" r="22">
+              <animateTransform attributeName="transform" type="translate" values="0 0; 46 -34; -26 44; 0 0" dur="8s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="blob" cx="110" cy="110" r="18">
+              <animateTransform attributeName="transform" type="translate" values="0 0; -50 22; 34 -40; 0 0" dur="10s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="blob" cx="110" cy="110" r="14">
+              <animateTransform attributeName="transform" type="translate" values="0 0; 28 50; -46 -24; 0 0" dur="7.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="cell">
+      <h2>B · Noise displacement</h2>
+      <p>A Perlin-noise map warps the shape's edges (feTurbulence + feDisplacementMap), animated — so the surface ripples and wobbles like water.</p>
+      <div class="stage">
+        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+          <defs>
+            <filter id="liquid" x="-30%" y="-30%" width="160%" height="160%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="7" result="n">
+                <animate attributeName="baseFrequency" dur="14s" values="0.014;0.026;0.014" repeatCount="indefinite"/>
+              </feTurbulence>
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="34"/>
+            </filter>
+          </defs>
+          <circle class="blob" cx="110" cy="110" r="66" filter="url(#liquid)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="cell">
+      <h2>C · Both together</h2>
+      <p>Metaballs merged, then noise-warped — the richest "living liquid." Slower and smaller amplitude would make it calm.</p>
+      <div class="stage">
+        <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+          <defs>
+            <filter id="both" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/>
+              <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4" result="n">
+                <animate attributeName="baseFrequency" dur="16s" values="0.02;0.032;0.02" repeatCount="indefinite"/>
+              </feTurbulence>
+              <feDisplacementMap in="goo" in2="n" scale="22"/>
+            </filter>
+          </defs>
+          <g filter="url(#both)">
+            <circle class="blob" cx="110" cy="110" r="40">
+              <animate attributeName="r" values="40;48;40" dur="7s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="blob" cx="110" cy="110" r="20">
+              <animateTransform attributeName="transform" type="translate" values="0 0; 44 -28; -30 40; 0 0" dur="9s" repeatCount="indefinite"/>
+            </circle>
+            <circle class="blob" cx="110" cy="110" r="16">
+              <animateTransform attributeName="transform" type="translate" values="0 0; -46 26; 32 -38; 0 0" dur="11s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
