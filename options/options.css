@@ -11,6 +11,20 @@ body {
   padding: 48px 24px;
 }
 
+.brand-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 32px;
+}
+
+.brand-logo {
+  flex: none;
+  width: 36px;
+  height: 58px;
+  color: var(--accent);
+}
+
 h1 {
   margin: 0 0 6px;
   font-size: 28px;
@@ -18,7 +32,7 @@ h1 {
 }
 
 .lede {
-  margin: 0 0 32px;
+  margin: 0;
   color: var(--muted);
 }
 

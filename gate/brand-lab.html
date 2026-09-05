@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — brand lab</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      padding: 48px 24px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .card {
+      flex: 1 1 360px;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: var(--r-lg);
+      padding: 44px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .variant-label {
+      font-size: var(--fs-xs);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin: 0 0 28px;
+    }
+
+    .brand { display: flex; flex-direction: column; align-items: center; }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      margin: var(--sp-2) 0 0;
+      font-size: var(--fs-xs);
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: lowercase;
+      color: var(--faint);
+    }
+    .wm-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+    .lotus-mark { transform-origin: bottom center; }
+    .monogram {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--accent);
+      display: block;
+    }
+
+    /* A — stacked (current) */
+    .stacked .mark { gap: 1px; }
+    .stacked .lotus-mark { width: 30px; height: 20px; }
+    .stacked .monogram { font-size: 26px; line-height: 0.85; }
+
+    /* B — nested (lotus perched atop the gf, like the logo) */
+    .nested .mark { position: relative; }
+    .nested .lotus-mark { width: 34px; height: 23px; position: relative; z-index: 1; }
+    .nested .monogram { font-size: 52px; line-height: 0.8; margin-top: -9px; }
+
+    /* C — nested, smaller lotus tucked into the bloom */
+    .tucked .mark { position: relative; }
+    .tucked .lotus-mark { width: 26px; height: 17px; position: relative; z-index: 1; }
+    .tucked .monogram { font-size: 46px; line-height: 0.8; margin-top: -6px; }
+
+    h1 {
+      margin: 28px 0 0;
+      font-family: var(--font-serif);
+      font-size: var(--fs-lg);
+      font-weight: 500;
+    }
+    .page-title {
+      text-align: center;
+      font-family: var(--font-serif);
+      font-weight: 500;
+      margin: 0 0 36px;
+    }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Brand lockup — comparison</h2>
+  <div class="row">
+    <div class="card stacked">
+      <p class="variant-label">A · stacked (current)</p>
+      <div class="brand">
+        <span class="mark" id="markA"></span>
+        <p class="wordmark"><span>gentle</span><span class="wm-dot"></span><span>focus</span></p>
+      </div>
+      <h1>Taking a moment</h1>
+    </div>
+
+    <div class="card nested">
+      <p class="variant-label">B · nested (lotus over gf)</p>
+      <div class="brand">
+        <span class="mark" id="markB"></span>
+        <p class="wordmark"><span>gentle</span><span class="wm-dot"></span><span>focus</span></p>
+      </div>
+      <h1>Taking a moment</h1>
+    </div>
+
+    <div class="card tucked">
+      <p class="variant-label">C · tucked (smaller lotus)</p>
+      <div class="brand">
+        <span class="mark" id="markC"></span>
+        <p class="wordmark"><span>gentle</span><span class="wm-dot"></span><span>focus</span></p>
+      </div>
+      <h1>Taking a moment</h1>
+    </div>
+  </div>
+
+  <script>
+    const lotus = `
+      <svg class="lotus-mark" viewBox="-22 -26 44 30" aria-hidden="true">
+        <g fill="var(--accent)">
+          <ellipse cx="0" cy="-10" rx="3.7" ry="12.6"/>
+          <g transform="rotate(-28)"><ellipse cx="0" cy="-9" rx="3.4" ry="11"/></g>
+          <g transform="rotate(28)"><ellipse cx="0" cy="-9" rx="3.4" ry="11"/></g>
+          <g transform="rotate(-55)"><ellipse cx="0" cy="-8" rx="3" ry="9"/></g>
+          <g transform="rotate(55)"><ellipse cx="0" cy="-8" rx="3" ry="9"/></g>
+          <g transform="rotate(-80)"><ellipse cx="0" cy="-6" rx="2.5" ry="6.6"/></g>
+          <g transform="rotate(80)"><ellipse cx="0" cy="-6" rx="2.5" ry="6.6"/></g>
+        </g>
+      </svg>`
+    const monogram = `<span class="monogram" aria-hidden="true">gf</span>`
+    for (const id of ['markA', 'markB', 'markC']) {
+      document.getElementById(id).innerHTML = lotus + monogram
+    }
+  </script>
+</body>
+</html>

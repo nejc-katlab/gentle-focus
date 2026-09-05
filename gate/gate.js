@@ -153,7 +153,6 @@ function showChooser(types) {
 
   setTimeout(() => {
     chooserEl.hidden = false
-    chooserEl.firstElementChild?.focus()
   }, CHOOSER_DELAY_MS)
 }
 
@@ -172,18 +171,52 @@ function enableContinue() {
   continueBtn.focus()
 }
 
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+function emitRipple() {
+  if (reduceMotion || !dwellEl.classList.contains('breathing')) return
+  const ring = document.createElement('span')
+  ring.className = 'dwell-ripple'
+  dwellEl.appendChild(ring)
+  setTimeout(() => ring.remove(), 2800)
+}
+
+let currentDigit = null
+
+function renderCount(text) {
+  const next = document.createElement('span')
+  next.className = 'digit'
+  next.textContent = text
+  countEl.appendChild(next)
+  if (!reduceMotion) next.style.animation = 'digit-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both'
+  const prev = currentDigit
+  currentDigit = next
+  if (prev) {
+    if (reduceMotion) {
+      prev.remove()
+    } else {
+      prev.style.animation = 'digit-out 560ms cubic-bezier(0.22, 1, 0.36, 1) both'
+      setTimeout(() => prev.remove(), 640)
+    }
+  }
+}
+
 function runDwell(seconds, onDone) {
   dwellEl.hidden = false
+  countEl.innerHTML = ''
+  currentDigit = null
   let remaining = Number(seconds)
   if (!Number.isFinite(remaining) || remaining < 0) remaining = 0
   remaining = Math.floor(remaining)
   const tick = () => {
-    countEl.textContent = remaining > 0 ? String(remaining) : '✓'
+    renderCount(remaining > 0 ? String(remaining) : '✓')
   }
   tick()
+  emitRipple()
   const iv = setInterval(() => {
     remaining -= 1
     tick()
+    if (remaining > 0) emitRipple()
     if (remaining <= 0) {
       clearInterval(iv)
       onDone()

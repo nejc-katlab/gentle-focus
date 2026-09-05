@@ -18,7 +18,7 @@ const DEFAULTS = {
     sessionEndNotify: true,
     tone: 'encouraging',
     showStatsOnGate: false,
-    puzzleModules: { schulte: true, unscramble: true, slide: true, lights: true }
+    puzzleModules: { schulte: true, unscramble: true, slide: true, lights: true, math: true, memory: true }
   },
   blocklist: [
     { pattern: 'reddit.com', type: 'domain' },

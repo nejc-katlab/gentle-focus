@@ -27,12 +27,34 @@ body {
   to { opacity: 1; transform: none; }
 }
 
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-4);
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lotus-mark {
+  width: 42px;
+  height: 67px;
+  color: var(--accent);
+  transform-origin: center;
+  animation: breathe 7s ease-in-out infinite;
+}
+
 .wordmark {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  margin: 0 0 var(--sp-4);
+  margin: 0;
   font-size: var(--fs-xs);
   font-weight: 500;
   letter-spacing: 0.07em;
@@ -45,16 +67,6 @@ body {
   height: 4px;
   border-radius: 50%;
   background: var(--accent);
-}
-
-.breath-mark {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  border: 1.5px solid var(--accent);
-  margin-right: var(--sp-1);
-  animation: breathe 7s ease-in-out infinite;
 }
 
 h1 {
@@ -157,34 +169,56 @@ h1 {
   position: relative;
   display: grid;
   place-items: center;
-  width: 96px;
-  height: 96px;
-  margin: 0 auto var(--sp-5);
+  width: 70px;
+  height: 70px;
+  margin: 0 auto var(--sp-6);
   border-radius: 50%;
   border: 2px solid var(--ring);
-  font-size: 22px;
+  background: var(--field);
+  font-size: 36px;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
 
+.dwell #count {
+  position: absolute;
+  inset: 0;
+}
+
+.dwell .digit {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  will-change: opacity, transform, filter;
+}
+
+@keyframes digit-in {
+  from { opacity: 0; transform: translateY(0.24em) scale(0.84); filter: blur(1.4px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes digit-out {
+  from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateY(-0.24em) scale(1.12); filter: blur(1.4px); }
+}
+
 .dwell.breathing {
   border-color: var(--accent);
+  color: var(--accent-strong);
   animation: breathe 7s ease-in-out infinite;
 }
 
-.dwell.breathing::before,
-.dwell.breathing::after {
-  content: "";
+.dwell-ripple {
   position: absolute;
-  inset: -2px;
+  inset: 0;
   border-radius: 50%;
   border: 2px solid var(--accent);
-  opacity: 0;
-  animation: ripple 7s ease-out infinite;
-}
-
-.dwell.breathing::after {
-  animation-delay: 3.5s;
+  pointer-events: none;
+  opacity: 0.5;
+  animation: dwell-ripple 2.6s ease-out forwards;
 }
 
 @keyframes breathe {
@@ -192,10 +226,9 @@ h1 {
   50% { transform: scale(1.05); }
 }
 
-@keyframes ripple {
-  0% { transform: scale(1); opacity: 0.4; }
-  70% { opacity: 0; }
-  100% { transform: scale(1.55); opacity: 0; }
+@keyframes dwell-ripple {
+  from { transform: scale(1); opacity: 0.5; }
+  to { transform: scale(1.35); opacity: 0; }
 }
 
 .fact {
@@ -377,7 +410,40 @@ h1 {
   cursor: default;
 }
 
+.memory {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-3);
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+.memory-pad {
+  aspect-ratio: 1;
+  border: 1px solid var(--ring);
+  border-radius: var(--r-md);
+  background: var(--field);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+
+.memory-pad:hover:not(:disabled):not(.lit) {
+  border-color: var(--accent);
+}
+
+.memory-pad.lit {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: scale(1.04);
+}
+
+.memory-pad:disabled {
+  cursor: default;
+}
+
 .primary {
+  position: relative;
+  z-index: 1;
   width: 100%;
   padding: var(--sp-4) 20px;
   border: none;
