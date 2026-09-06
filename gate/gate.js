@@ -1,4 +1,5 @@
 import { msg } from '../shared/messages.js'
+import { runFillButton } from './fillbutton.js'
 import { currentStreak } from '../shared/stats.js'
 import { enabledPuzzles } from './puzzles/index.js'
 import { effectiveStrictness } from '../shared/sessions.js'
@@ -15,8 +16,6 @@ const gateStatEl = document.getElementById('gateStat')
 const chooserEl = document.getElementById('chooser')
 const frictionEl = document.getElementById('friction')
 const mountEl = document.getElementById('mount')
-const dwellEl = document.getElementById('dwell')
-const countEl = document.getElementById('count')
 const continueBtn = document.getElementById('continue')
 const switchTimerBtn = document.getElementById('switchTimer')
 const overrideLink = document.getElementById('overrideLink')
@@ -122,7 +121,6 @@ function startNextStep() {
   chooserEl.hidden = true
   chooserEl.innerHTML = ''
   mountEl.innerHTML = ''
-  dwellEl.hidden = true
   switchTimerBtn.hidden = true
   continueBtn.textContent = 'Continue'
   beginSelection()
@@ -168,69 +166,12 @@ function startFriction(type) {
 function enableContinue() {
   continueBtn.disabled = false
   continueBtn.textContent = 'Continue'
-  continueBtn.focus()
-}
-
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
-
-function emitRipple() {
-  if (reduceMotion || !dwellEl.classList.contains('breathing')) return
-  const ring = document.createElement('span')
-  ring.className = 'dwell-ripple'
-  dwellEl.appendChild(ring)
-  setTimeout(() => ring.remove(), 2800)
-}
-
-let currentDigit = null
-
-function renderCount(text) {
-  const next = document.createElement('span')
-  next.className = 'digit'
-  next.textContent = text
-  countEl.appendChild(next)
-  if (!reduceMotion) next.style.animation = 'digit-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both'
-  const prev = currentDigit
-  currentDigit = next
-  if (prev) {
-    if (reduceMotion) {
-      prev.remove()
-    } else {
-      prev.style.animation = 'digit-out 560ms cubic-bezier(0.22, 1, 0.36, 1) both'
-      setTimeout(() => prev.remove(), 640)
-    }
-  }
-}
-
-function runDwell(seconds, onDone) {
-  dwellEl.hidden = false
-  countEl.innerHTML = ''
-  currentDigit = null
-  let remaining = Number(seconds)
-  if (!Number.isFinite(remaining) || remaining < 0) remaining = 0
-  remaining = Math.floor(remaining)
-  const tick = () => {
-    renderCount(remaining > 0 ? String(remaining) : '✓')
-  }
-  tick()
-  emitRipple()
-  const iv = setInterval(() => {
-    remaining -= 1
-    tick()
-    if (remaining > 0) emitRipple()
-    if (remaining <= 0) {
-      clearInterval(iv)
-      onDone()
-    }
-  }, 1000)
+  continueBtn.focus({ focusVisible: false })
 }
 
 async function runTimer(sec) {
   await showQuote()
-  dwellEl.classList.add('breathing')
-  runDwell(sec ?? 15, () => {
-    dwellEl.classList.remove('breathing')
-    enableContinue()
-  })
+  runFillButton(continueBtn, sec ?? 15, enableContinue)
 }
 
 async function showQuote() {
@@ -262,7 +203,7 @@ async function runFact() {
   text.className = 'fact'
   text.textContent = fact.text
   mountEl.append(cat, text)
-  runDwell(settings.factDwellSec ?? 20, enableContinue)
+  runFillButton(continueBtn, settings.factDwellSec ?? 20, enableContinue)
 }
 
 async function pickFact() {

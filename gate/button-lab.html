@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — filling continue button</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font); padding:48px 24px; }
+    .page-title { text-align:center; font-family:var(--font-serif); font-weight:500; margin:0 0 8px; }
+    .page-note { text-align:center; color:var(--muted); font-size:var(--fs-sm); margin:0 0 36px; }
+    .row { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; max-width:820px; margin:0 auto; }
+    .card { flex:1 1 340px; max-width:380px; background:var(--card); border:1px solid var(--ring); border-radius:var(--r-lg);
+            padding:36px 32px 32px; text-align:center; box-shadow:var(--shadow-card); }
+    .variant-label { font-size:var(--fs-xs); letter-spacing:0.08em; text-transform:uppercase; color:var(--faint); margin:0 0 20px; }
+    .quote { font-family:var(--font-serif); font-size:var(--fs-md); line-height:1.5; margin:0 0 6px; }
+    .quote-author { color:var(--muted); font-size:var(--fs-sm); margin:0 0 28px; }
+    .caption { margin:18px 0 0; color:var(--muted); font-size:var(--fs-sm); }
+    .controls { display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin:36px auto 0; color:var(--muted); font-size:var(--fs-sm); align-items:center; }
+    .controls input[type=range] { width:220px; accent-color:var(--accent); }
+    .controls label { display:flex; align-items:center; gap:6px; }
+    .controls button { font:inherit; color:var(--ink); background:var(--field); border:1px solid var(--ring); border-radius:var(--r-pill); padding:6px 14px; cursor:pointer; }
+
+    .primary {
+      position:relative; display:block; width:100%; padding:16px 20px; border:none; border-radius:var(--r-pill);
+      background:var(--accent); color:var(--accent-ink); font-size:var(--fs-md); font-weight:600; cursor:pointer;
+      transition:transform 160ms ease, box-shadow 400ms ease; overflow:hidden; isolation:isolate; font-family:var(--font);
+    }
+    .primary.filling { background:transparent; color:var(--accent); cursor:default; }
+    body.track .primary.filling { background:var(--accent-soft); }
+    .primary svg { position:absolute; inset:0; width:100%; height:100%; display:block; z-index:-1; }
+    .primary.filling .label { visibility:hidden; }
+    .primary svg text { font:600 var(--fs-md) var(--font); }
+    .primary:not(.filling) svg { display:none; }
+    .btn-wrap { position:relative; width:50%; margin:0 auto; }
+    .btn-wrap .primary:focus-visible { outline:none; }
+    .btn-wrap.rippling::before, .btn-wrap.rippling::after { content:""; position:absolute; inset:0; border-radius:var(--r-pill); pointer-events:none; animation:btn-ripple 1800ms ease-out forwards; }
+    .btn-wrap.rippling::after { animation-delay:450ms; }
+    @keyframes btn-ripple { 0% { box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); } 18% { box-shadow:0 0 4px 3px color-mix(in srgb, var(--accent) 30%, transparent); } 100% { box-shadow:0 0 14px 26px color-mix(in srgb, var(--accent) 0%, transparent); } }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Continue button as the timer</h2>
+  <p class="page-note">The button itself fills over 15s and becomes tappable when full. Four fill styles.</p>
+  <div class="row" id="row"></div>
+  <div class="controls">
+    <label for="scrub">Scrub <input id="scrub" type="range" min="0" max="1000" value="0"> <span id="scrubVal">live</span></label>
+    <button id="replay">Replay</button>
+    <label><input id="track" type="checkbox"> show pale track while filling</label>
+  </div>
+
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const DUR = 15
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x))
+    const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+
+    const variants = [
+      { key: 'lr', label: 'A · left to right', desc: 'A flat edge sweeps across like a progress bar.' },
+      { key: 'bt', label: 'B · bottom to top', desc: 'The level rises with a barely-there tilt.' },
+      { key: 'wave', label: 'C · rising wave', desc: 'The level rises with a soft two-layer wave on top.' },
+      { key: 'lrwave', label: 'D · wavy sweep', desc: 'Left to right, with a rippling front edge.' }
+    ]
+
+    function build(v) {
+      const card = document.createElement('div')
+      card.className = 'card'
+      card.innerHTML = `
+        <p class="variant-label">${v.label}</p>
+        <p class="quote">“Almost everything will work again if you unplug it for a few minutes.”</p>
+        <p class="quote-author">— Anne Lamott</p>
+        <div class="btn-wrap"><button class="primary filling" disabled>
+          <svg aria-hidden="true">
+            <defs><clipPath id="clip-${v.key}"><path class="clip"/></clipPath></defs>
+            <path class="back" opacity="0.45"/>
+            <path class="front"/>
+            <text class="t-base" text-anchor="middle" dominant-baseline="central">Continue</text>
+            <text class="t-fill" text-anchor="middle" dominant-baseline="central" clip-path="url(#clip-${v.key})">Continue</text>
+          </svg>
+          <span class="label">Continue</span>
+        </button></div>
+        <p class="caption">${v.desc}</p>`
+      document.getElementById('row').append(card)
+      v.btn = card.querySelector('button'); v.wrap = card.querySelector('.btn-wrap')
+      v.svg = card.querySelector('svg')
+      v.back = card.querySelector('.back'); v.front = card.querySelector('.front'); v.clip = card.querySelector('.clip')
+      v.tBase = card.querySelector('.t-base'); v.tFill = card.querySelector('.t-fill')
+      v.caption = card.querySelector('.caption')
+    }
+    variants.forEach(build)
+
+    function shapes(v, W, H, t, p) {
+      const e = reduce ? p : p
+      if (v.key === 'lr') {
+        const x = W * e
+        return { front: `M0 0 H${x.toFixed(1)} V${H} H0 Z`, back: '' }
+      }
+      if (v.key === 'bt') {
+        const y = H * (1 - e)
+        const tilt = reduce ? 0 : 1.2 * Math.sin(t * 0.9)
+        return { front: `M0 ${(y + tilt).toFixed(1)} L${W} ${(y - tilt).toFixed(1)} V${H} H0 Z`, back: '' }
+      }
+      if (v.key === 'wave') {
+        const y = H * (1 - e) + 1.5
+        const amp = reduce ? 0 : 3.2 * Math.min(1, e * 6) * Math.min(1, (1 - e) * 6 + 0.15)
+        const wave = (ph, k, sp) => { let d = ''; for (let i = 0; i <= 40; i++) { const x = (i / 40) * W; d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (y + amp * Math.sin(x * k + t * sp + ph)).toFixed(1) + ' ' } return d + `L${W} ${H} L0 ${H} Z` }
+        return { front: wave(0, 0.028, 1.6), back: wave(2.2, 0.022, -1.1) }
+      }
+      const x0 = W * e
+      const amp = reduce ? 0 : 4 * Math.min(1, e * 8) * Math.min(1, (1 - e) * 8 + 0.1)
+      const edge = (ph, k, sp) => { let d = `M0 0 `; for (let i = 0; i <= 24; i++) { const yy = (i / 24) * H; d += 'L' + (x0 + amp * Math.sin(yy * k + t * sp + ph)).toFixed(1) + ' ' + yy.toFixed(1) + ' ' } return d + `L0 ${H} Z` }
+      return { front: edge(0, 0.22, 2.4), back: edge(1.8, 0.3, -1.7) }
+    }
+
+    function frame(v, t, p) {
+      const W = v.btn.clientWidth, H = v.btn.clientHeight
+      v.svg.setAttribute('viewBox', `0 0 ${W} ${H}`)
+      const s = shapes(v, W, H, t, p)
+      v.front.setAttribute('d', s.front); v.clip.setAttribute('d', s.front)
+      v.back.setAttribute('d', s.back || s.front)
+      v.front.setAttribute('fill', css('--accent')); v.back.setAttribute('fill', css('--accent'))
+      v.tBase.setAttribute('x', W / 2); v.tBase.setAttribute('y', H / 2); v.tBase.setAttribute('fill', css('--accent'))
+      v.tFill.setAttribute('x', W / 2); v.tFill.setAttribute('y', H / 2); v.tFill.setAttribute('fill', css('--accent-ink'))
+      const done = p >= 1
+      if (done && v.btn.disabled) { v.btn.disabled = false; v.btn.classList.remove('filling'); v.wrap.classList.add('rippling') }
+      if (!done && !v.btn.disabled) { v.btn.disabled = true; v.btn.classList.add('filling'); v.wrap.classList.remove('rippling') }
+    }
+
+    const scrub = document.getElementById('scrub'), scrubVal = document.getElementById('scrubVal')
+    let manual = null, start = performance.now()
+    scrub.addEventListener('input', () => { manual = scrub.valueAsNumber / 1000; scrubVal.textContent = Math.round(manual * 100) + '%' })
+    document.getElementById('track').addEventListener('change', e => document.body.classList.toggle('track', e.target.checked))
+    document.getElementById('replay').addEventListener('click', () => { manual = null; scrubVal.textContent = 'live'; start = performance.now() })
+    ;(function loop(now) {
+      const e = (now - start) / 1000
+      const p = manual ?? clamp(e / DUR, 0, 1)
+      if (manual === null) scrub.value = Math.round(p * 1000)
+      variants.forEach(v => frame(v, e, p))
+      requestAnimationFrame(loop)
+    })(performance.now())
+  </script>
+</body>
+</html>

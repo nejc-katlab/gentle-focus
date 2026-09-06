@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — cup timer</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font); padding:48px 24px; }
+    .page-title { text-align:center; font-family:var(--font-serif); font-weight:500; margin:0 0 8px; }
+    .page-note { text-align:center; color:var(--muted); font-size:var(--fs-sm); margin:0 0 40px; }
+    .row { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; max-width:780px; margin:0 auto; }
+    .card { flex:1 1 320px; max-width:360px; background:var(--card); border:1px solid var(--ring); border-radius:var(--r-lg);
+            padding:36px 32px 34px; text-align:center; box-shadow:var(--shadow-card); }
+    .variant-label { font-size:var(--fs-xs); letter-spacing:0.08em; text-transform:uppercase; color:var(--faint); margin:0 0 24px; }
+    .quote { font-family:var(--font-serif); font-size:var(--fs-md); line-height:1.5; margin:0 0 22px; }
+    .stage { display:block; width:190px; height:190px; margin:0 auto; overflow:visible; }
+    .caption { margin:22px 0 0; color:var(--muted); font-size:var(--fs-sm); }
+    .controls { display:flex; justify-content:center; gap:12px; margin:36px auto 0; color:var(--muted); font-size:var(--fs-sm); align-items:center; }
+    .controls input { width:220px; accent-color:var(--accent); }
+    .steam { fill:none; stroke:#d9c7ab; stroke-width:4; stroke-linecap:round; }
+    @media (prefers-color-scheme: dark) { .steam { stroke:#8f7d63; } }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Cup timer — two options</h2>
+  <p class="page-note">A cup slowly fills while you wait. Both loop every 15s; drag the slider to scrub.</p>
+
+  <div class="row">
+    <div class="card">
+      <p class="variant-label">A · from above</p>
+      <p class="quote">“Almost everything will work again if you unplug it for a few minutes.”</p>
+      <svg class="stage" id="top" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <clipPath id="topOpen"><ellipse cx="100" cy="106" rx="54" ry="48"/></clipPath>
+          <radialGradient id="topInner" cx="0.5" cy="0.25" r="0.75">
+            <stop offset="0" stop-color="#e2d2b8"/><stop offset="1" stop-color="#b79a74"/>
+          </radialGradient>
+          <radialGradient id="topBrew" cx="0.42" cy="0.35" r="0.7">
+            <stop offset="0" stop-color="#b07d55"/><stop offset="1" stop-color="#7e5236"/>
+          </radialGradient>
+          <linearGradient id="topRim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fbf4e7"/><stop offset="1" stop-color="#e8dcc6"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="118" rx="82" ry="68" fill="#000" opacity="0.08"/>
+        <g id="topScene">
+          <path id="topSteam1" class="steam"/>
+          <path id="topSteam2" class="steam"/>
+          <path d="M170 76 C 200 70 204 122 176 136" fill="none" stroke="#a9855f" stroke-width="14" stroke-linecap="round"/>
+          <path d="M170 76 C 200 70 204 122 176 136" fill="none" stroke="#f4ebda" stroke-width="7" stroke-linecap="round"/>
+          <ellipse cx="100" cy="104" rx="78" ry="70" fill="url(#topRim)" stroke="#a9855f" stroke-width="6"/>
+          <ellipse cx="100" cy="106" rx="54" ry="48" fill="url(#topInner)"/>
+          <g clip-path="url(#topOpen)">
+            <ellipse id="topWallShade" cx="100" cy="112" rx="54" ry="48" fill="#8f6f4e" opacity="0.35"/>
+            <ellipse id="topBrewDisc" fill="url(#topBrew)"/>
+            <ellipse id="topRipple1" fill="none" stroke="#d9b48e" stroke-width="2" opacity="0"/>
+            <ellipse id="topRipple2" fill="none" stroke="#d9b48e" stroke-width="2" opacity="0"/>
+            <ellipse id="topGlint" fill="#fff" opacity="0.18"/>
+            <path id="topDrop" fill="#b07d55"/>
+            <g id="topFace" opacity="0">
+              <ellipse id="tBlushL" rx="5" ry="3.4" fill="#e7a79f" opacity="0.65"/>
+              <ellipse id="tBlushR" rx="5" ry="3.4" fill="#e7a79f" opacity="0.65"/>
+              <path id="tEyeL" fill="none" stroke="#f3e6d2" stroke-width="3.4" stroke-linecap="round"/>
+              <path id="tEyeR" fill="none" stroke="#f3e6d2" stroke-width="3.4" stroke-linecap="round"/>
+              <path id="tSmile" fill="none" stroke="#f3e6d2" stroke-width="3.4" stroke-linecap="round"/>
+            </g>
+          </g>
+          <ellipse cx="100" cy="106" rx="54" ry="48" fill="none" stroke="#a9855f" stroke-width="4"/>
+        </g>
+      </svg>
+      <p class="caption">A short pause, then you can continue.</p>
+    </div>
+
+    <div class="card">
+      <p class="variant-label">B · chunky mug</p>
+      <p class="quote">“Almost everything will work again if you unplug it for a few minutes.”</p>
+      <svg class="stage" id="side" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <clipPath id="sideBowl"><path d="M46 74 L154 74 L154 118 A54 54 0 0 1 46 118 Z"/></clipPath>
+          <linearGradient id="sideInner" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f1e5d1"/><stop offset="1" stop-color="#dcc9ac"/>
+          </linearGradient>
+          <linearGradient id="sideBrew" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#8b5a3c"/><stop offset="1" stop-color="#b47f58"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="182" rx="60" ry="7" fill="#000" opacity="0.12"/>
+        <g id="sideScene">
+          <path id="sideSteam1" class="steam"/>
+          <path id="sideSteam2" class="steam"/>
+          <path d="M160 92 C 194 92 194 146 160 146" fill="none" stroke="#a9855f" stroke-width="16" stroke-linecap="round"/>
+          <path d="M160 92 C 194 92 194 146 160 146" fill="none" stroke="#f4ebda" stroke-width="7" stroke-linecap="round"/>
+          <path d="M46 74 L154 74 L154 118 A54 54 0 0 1 46 118 Z" fill="#f4ebda" stroke="#a9855f" stroke-width="6" stroke-linejoin="round"/>
+          <g clip-path="url(#sideBowl)">
+            <path d="M46 74 L154 74 L154 118 A54 54 0 0 1 46 118 Z" fill="url(#sideInner)"/>
+            <path id="sideBrewFill" fill="url(#sideBrew)"/>
+            <path id="sideFoam" fill="none" stroke="#e6cfae" stroke-width="3.5" stroke-linecap="round"/>
+            <path id="sideStream" fill="none" stroke="#b47f58" stroke-width="5" stroke-linecap="round"/>
+          </g>
+          <g id="sideFace">
+            <circle cx="79" cy="132" r="5" fill="#e7a79f" opacity="0.6"/>
+            <circle cx="121" cy="132" r="5" fill="#e7a79f" opacity="0.6"/>
+            <path d="M84 124 q4 -5 8 0" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"/>
+            <path d="M108 124 q4 -5 8 0" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"/>
+            <path id="sideSmile" d="M93 138 q7 6 14 0" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"/>
+          </g>
+          <rect x="40" y="62" width="120" height="20" rx="10" fill="#fbf4e7" stroke="#a9855f" stroke-width="6"/>
+        </g>
+      </svg>
+      <p class="caption">A short pause, then you can continue.</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label for="scrub">Progress</label>
+    <input id="scrub" type="range" min="0" max="1000" value="0">
+    <span id="scrubVal">auto</span>
+  </div>
+
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const LOOP = 15, FILL = 12
+    const S = id => document.getElementById(id)
+    const ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x)
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x))
+    const rise = (p, from, to) => clamp((p - from) / (to - from), 0, 1)
+
+    function steam(el, x0, top, t, ph, o) {
+      let d = ''
+      for (let i = 0; i <= 10; i++) { const y = top - i * 4.4; const x = x0 + 5.5 * Math.sin(y * 0.2 + t * 1.3 + ph); d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ' }
+      el.setAttribute('d', d)
+      el.style.opacity = (o * (0.45 + 0.2 * Math.sin(t * 1.2 + ph))).toFixed(2)
+    }
+
+    const tv = {
+      scene: S('topScene'), disc: S('topBrewDisc'), glint: S('topGlint'), shade: S('topWallShade'), drop: S('topDrop'),
+      r1: S('topRipple1'), r2: S('topRipple2'), face: S('topFace'), st1: S('topSteam1'), st2: S('topSteam2')
+    }
+    function frameTop(t, p) {
+      const bob = reduce ? 0 : 1.4 * Math.sin(t * 0.8)
+      tv.scene.setAttribute('transform', `translate(0 ${bob.toFixed(2)})`)
+      const f = ease(rise(p, 0, 1))
+      const cy = 126 - 20 * f, rx = 38 + 16 * f, ry = 30 + 18 * f
+      const wob = reduce ? 0 : 0.6 * Math.sin(t * 2.1)
+      tv.disc.setAttribute('cx', 100 + wob); tv.disc.setAttribute('cy', cy); tv.disc.setAttribute('rx', rx); tv.disc.setAttribute('ry', ry)
+      tv.shade.style.opacity = (0.4 - 0.3 * f).toFixed(2)
+      tv.glint.setAttribute('cx', 100 - rx * 0.4 + wob); tv.glint.setAttribute('cy', cy - ry * 0.45)
+      tv.glint.setAttribute('rx', rx * 0.32); tv.glint.setAttribute('ry', ry * 0.16)
+
+      const pouring = p > 0.02 && p < 0.97
+      const cyc = (t * 1.6) % 1
+      if (pouring && !reduce) {
+        const y = 40 + (cy - 40) * cyc
+        tv.drop.setAttribute('d', `M100 ${y - 9} C 104 ${y - 4} 105 ${y} 100 ${y + 3} C 95 ${y} 96 ${y - 4} 100 ${y - 9} Z`)
+        tv.drop.style.opacity = '1'
+      } else tv.drop.style.opacity = '0'
+      const rp = (t * 1.6 + 0.15) % 1
+      ;[[tv.r1, rp], [tv.r2, (rp + 0.5) % 1]].forEach(([el, q]) => {
+        el.setAttribute('cx', 100 + wob); el.setAttribute('cy', cy); el.setAttribute('rx', 4 + q * rx * 0.9); el.setAttribute('ry', (4 + q * rx * 0.9) * ry / rx)
+        el.style.opacity = pouring && !reduce ? (0.5 * (1 - q)).toFixed(2) : '0'
+      })
+
+      const fo = rise(p, 0.88, 1)
+      tv.face.setAttribute('opacity', fo.toFixed(2))
+      const fy = cy + 2
+      S('tEyeL').setAttribute('d', `M${100 - 15} ${fy - 4} q4 -5 8 0`)
+      S('tEyeR').setAttribute('d', `M${100 + 7} ${fy - 4} q4 -5 8 0`)
+      S('tSmile').setAttribute('d', `M${100 - 8} ${fy + 7} q8 8 16 0`)
+      S('tBlushL').setAttribute('cx', 100 - 22); S('tBlushL').setAttribute('cy', fy + 4)
+      S('tBlushR').setAttribute('cx', 100 + 22); S('tBlushR').setAttribute('cy', fy + 4)
+      steam(tv.st1, 88, 58, t, 0, fo); steam(tv.st2, 112, 58, t, 2, fo)
+    }
+
+    const side = { scene: S('sideScene'), brew: S('sideBrewFill'), foam: S('sideFoam'), stream: S('sideStream'), smile: S('sideSmile'), st1: S('sideSteam1'), st2: S('sideSteam2') }
+    const surf = (x, level, t) => level + (reduce ? 0 : 1.5 * Math.sin(x * 0.12 - t * 1.1) + 0.7 * Math.sin(x * 0.23 - t * 1.6 + 1))
+    function frameSide(t, p) {
+      const bob = reduce ? 0 : 1.4 * Math.sin(t * 0.8 + 1)
+      side.scene.setAttribute('transform', `translate(0 ${bob.toFixed(2)})`)
+      const f = ease(rise(p, 0, 1))
+      const level = 168 - f * (168 - 84)
+      let line = ''
+      for (let i = 0; i <= 30; i++) { const x = 40 + (i / 30) * 120; line += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + surf(x, level, t).toFixed(1) + ' ' }
+      side.brew.setAttribute('d', line + 'L160 200 L40 200 Z')
+      side.foam.setAttribute('d', line)
+      const pouring = p > 0.02 && p < 0.97
+      if (pouring && !reduce) {
+        const sway = 1.2 * Math.sin(t * 6)
+        side.stream.setAttribute('d', `M${100 + sway} 60 Q ${100 - sway} ${(60 + level) / 2} 100 ${level + 2}`)
+        side.stream.style.opacity = '1'
+      } else side.stream.style.opacity = '0'
+      const fo = rise(p, 0.88, 1)
+      side.smile.setAttribute('d', fo > 0.5 ? 'M91 137 q9 10 18 0' : 'M93 138 q7 6 14 0')
+      steam(side.st1, 88, 56, t, 0, fo); steam(side.st2, 112, 56, t, 2, fo)
+    }
+
+    const scrub = S('scrub'), scrubVal = S('scrubVal')
+    let manual = null
+    scrub.addEventListener('input', () => { manual = scrub.valueAsNumber / 1000; scrubVal.textContent = Math.round(manual * 100) + '%' })
+    scrub.addEventListener('dblclick', () => { manual = null; scrubVal.textContent = 'auto' })
+
+    const start = performance.now()
+    function loop(now) {
+      const e = (now - start) / 1000
+      const auto = clamp((e % LOOP) / FILL, 0, 1)
+      const p = manual ?? (reduce ? 0.7 : auto)
+      if (manual === null) scrub.value = Math.round(p * 1000)
+      frameTop(e, p); frameSide(e, p)
+      requestAnimationFrame(loop)
+    }
+    requestAnimationFrame(loop)
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — round mug pour</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font); padding:48px 24px; }
+    .page-title { text-align:center; font-family:var(--font-serif); font-weight:500; margin:0 0 8px; }
+    .page-note { text-align:center; color:var(--muted); font-size:var(--fs-sm); margin:0 0 36px; }
+    .card { max-width:360px; margin:0 auto; background:var(--card); border:1px solid var(--ring); border-radius:var(--r-lg);
+            padding:40px 32px 36px; text-align:center; box-shadow:var(--shadow-card); }
+    .quote { font-family:var(--font-serif); font-size:var(--fs-md); line-height:1.5; margin:0 0 8px; }
+    .caption { margin:20px 0 0; color:var(--muted); font-size:var(--fs-sm); }
+    .controls { display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin:36px auto 0; color:var(--muted); font-size:var(--fs-sm); align-items:center; }
+    .controls input[type=range] { width:220px; accent-color:var(--accent); }
+    .controls label { display:flex; align-items:center; gap:6px; }
+    .controls button { font:inherit; color:var(--ink); background:var(--field); border:1px solid var(--ring); border-radius:var(--r-pill); padding:6px 14px; cursor:pointer; }
+    .mug-wrap { width:190px; height:190px; margin:16px auto 0; }
+    .mug-wrap .mug { display:block; width:100%; height:100%; overflow:visible; }
+    .mug-steam { fill:none; stroke:#d9c7ab; stroke-width:4; stroke-linecap:round; }
+    @media (prefers-color-scheme: dark) { .mug-steam { stroke:#8f7d63; } }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Round mug — pour</h2>
+  <p class="page-note">Fills once over 15s and stops full. Uses the same module as the gate timer.</p>
+  <div class="card">
+    <p class="quote">“Almost everything will work again if you unplug it for a few minutes.”</p>
+    <div class="mug-wrap" id="mug"></div>
+    <p class="caption" id="caption">A short pause, then you can continue.</p>
+  </div>
+  <div class="controls">
+    <label for="scrub">Scrub <input id="scrub" type="range" min="0" max="1000" value="0"> <span id="scrubVal">live</span></label>
+    <button id="replay">Replay</button>
+  </div>
+
+  <script type="module">
+    import { mountMug, runMug } from './mug.js'
+    const holder = document.getElementById('mug'), caption = document.getElementById('caption')
+    const scrub = document.getElementById('scrub'), scrubVal = document.getElementById('scrubVal')
+    let stop = null, scrubMug = null, raf = 0
+
+    function play() {
+      cancelAnimationFrame(raf); scrubMug = null
+      if (stop) stop()
+      caption.textContent = 'A short pause, then you can continue.'
+      scrubVal.textContent = 'live'
+      stop = runMug(holder, 15, () => { caption.textContent = 'Ready when you are.' })
+    }
+    scrub.addEventListener('input', () => {
+      if (stop) { stop(); stop = null }
+      if (!scrubMug) { scrubMug = mountMug(holder); const t0 = performance.now(); (function tick(now) { scrubMug.frame((now - t0) / 1000, scrub.valueAsNumber / 1000); raf = requestAnimationFrame(tick) })(t0) }
+      scrubVal.textContent = Math.round(scrub.valueAsNumber / 10) + '%'
+    })
+    document.getElementById('replay').addEventListener('click', play)
+    play()
+  </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — flowing cups</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font); padding:48px 24px; }
+    .page-title { text-align:center; font-family:var(--font-serif); font-weight:500; margin:0 0 8px; }
+    .page-note { text-align:center; color:var(--muted); font-size:var(--fs-sm); margin:0 0 40px; }
+    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:760px; margin:0 auto; }
+    @media (max-width:620px){ .grid{ grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--ring); border-radius:var(--r-lg); padding:26px 24px 22px; text-align:center; box-shadow:var(--shadow-card); }
+    .variant-label { font-size:var(--fs-xs); letter-spacing:0.08em; text-transform:uppercase; color:var(--faint); margin:0 0 4px; }
+    .variant-name { font-family:var(--font-serif); font-size:var(--fs-md); margin:0 0 16px; }
+    .stage { display:block; width:130px; height:140px; margin:0 auto; }
+    .caption { margin:16px 0 0; color:var(--muted); font-size:var(--fs-sm); }
+    .cup { fill:none; stroke:#cbbaa2; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Flowing cups — four ways to fill</h2>
+  <p class="page-note">Same soft cup; the difference is how the coffee flows in. Loops every 15s.</p>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const DUR = 15, W = 130, CX = 62, CY = 66, R = 42
+    const TOPY = CY - R + 4, BOTY = CY + R - 4
+    const COFFEE = '#7a5236', CREMA = '#b98a5e', DROPC = '#7a5236'
+
+    const tiles = [
+      { key:'A', name:'Steady stream',  desc:'flow' },
+      { key:'B', name:'Gentle swirl',   desc:'swirl' },
+      { key:'C', name:'Breathing tide', desc:'tide' },
+      { key:'D', name:'Falling drops',  desc:'drops' }
+    ]
+
+    const NS='http://www.w3.org/2000/svg'
+    const grid = document.getElementById('grid')
+    for (const t of tiles) {
+      const defs = `<clipPath id="clip${t.key}"><circle cx="${CX}" cy="${CY}" r="${R-2}"/></clipPath>`
+      const inner =
+        `<defs>${defs}</defs>` +
+        `<path class="cup" d="M100 48 C 124 50 124 86 100 84"/>` +
+        `<circle class="cup" cx="${CX}" cy="${CY}" r="${R}"/>` +
+        `<g clip-path="url(#clip${t.key})">` +
+          `<path class="liquid" fill="${COFFEE}"></path>` +
+          `<path class="crema" fill="none" stroke="${CREMA}" stroke-width="3" stroke-linecap="round"></path>` +
+          `<g class="swirl" fill="none" stroke="${CREMA}" stroke-width="2.4" stroke-linecap="round"></g>` +
+          `<g class="ripple"></g>` +
+        `</g>` +
+        `<path class="stream" fill="${COFFEE}"></path>` +
+        `<circle class="drop" fill="${DROPC}"></circle>`
+      const card = document.createElement('div')
+      card.className='card'
+      card.innerHTML = `<p class="variant-label">${t.key} · ${t.name}</p><p class="variant-name">${t.name}</p>` +
+        `<svg class="stage" viewBox="0 0 130 140" aria-hidden="true">${inner}</svg>` +
+        `<p class="caption">A short pause, then you can continue.</p>`
+      grid.appendChild(card)
+      const s = card.querySelector('svg')
+      t.liquid=s.querySelector('.liquid'); t.crema=s.querySelector('.crema'); t.swirl=s.querySelector('.swirl')
+      t.rippleG=s.querySelector('.ripple'); t.stream=s.querySelector('.stream'); t.drop=s.querySelector('.drop')
+      t.ripEls=[0,1].map(()=>{ const e=document.createElementNS(NS,'ellipse'); e.setAttribute('fill','none'); e.setAttribute('stroke',CREMA); e.setAttribute('stroke-width','2'); t.rippleG.appendChild(e); return e })
+    }
+
+    function surfLine(level, amp, freq, t, speed, tilt){
+      let d=''
+      for(let i=0;i<=22;i++){ const x=(i/22)*W; const y=level + tilt*((x-CX)/R) + amp*Math.sin(x*freq - t*speed) + amp*0.4*Math.sin(x*freq*1.9 - t*speed*1.5 + 1.1); d+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ' }
+      return d
+    }
+    function fillFrom(line){ return line + `L ${W} ${BOTY+R} L 0 ${BOTY+R} Z` }
+
+    function streamPath(cx, yTop, yBot, w){ const h=w/2; return `M${cx-h} ${yTop} Q${cx-h-1} ${(yTop+yBot)/2} ${cx-h} ${yBot} L${cx+h} ${yBot} Q${cx+h+1} ${(yTop+yBot)/2} ${cx+h} ${yTop} Z` }
+
+    function frame(t, p){
+      for (const tile of tiles){
+        let level = BOTY - p*(BOTY - TOPY)
+        let amp=2, freq=0.12, speed=1.1, tilt=0
+        tile.swirl.innerHTML=''; tile.drop.style.opacity=0; tile.stream.style.opacity=0
+        tile.ripEls.forEach(e=>e.style.opacity=0)
+
+        if (tile.key==='A'){ amp=2.2; speed=1.1
+          const line=surfLine(level,amp,freq,t,speed,0)
+          tile.liquid.setAttribute('d',fillFrom(line)); tile.crema.setAttribute('d',line)
+          if(p>0.02&&p<0.98){ tile.stream.style.opacity=1; tile.stream.setAttribute('d', streamPath(CX+1.2*Math.sin(t*2.5), 12, level-1, 11)) }
+        }
+        else if (tile.key==='B'){ amp=1.8; speed=0.9
+          const line=surfLine(level,amp,freq,t,speed,0)
+          tile.liquid.setAttribute('d',fillFrom(line)); tile.crema.setAttribute('d',line)
+          // rotating swirl on the surface
+          const rot=t*1.6, turns=2.4; let d=''
+          for(let i=0;i<=60;i++){ const a=(i/60)*turns*2*Math.PI; const rr=(i/60)*(surfW(level)*0.42); const x=CX+rr*Math.cos(a+rot); const y=level+rr*0.32*Math.sin(a+rot); d+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ' }
+          const sp=document.createElementNS(NS,'path'); sp.setAttribute('d',d); sp.setAttribute('fill','none'); sp.setAttribute('stroke',CREMA); sp.setAttribute('stroke-width','2.4'); sp.setAttribute('stroke-linecap','round'); sp.setAttribute('opacity','0.8'); tile.swirl.appendChild(sp)
+          if(p>0.02&&p<0.98){ tile.stream.style.opacity=1; tile.stream.setAttribute('d', streamPath(CX,12,level-1,11)) }
+        }
+        else if (tile.key==='C'){ // breathing tide: level bobs, big slow slosh, pulsing pour
+          const breath=Math.sin(t*0.9)
+          level = Math.max(TOPY, level - 3*breath)
+          amp=5; freq=0.07; speed=0.55; tilt=6*Math.sin(t*0.75)
+          const line=surfLine(level,amp,freq,t,speed,tilt)
+          tile.liquid.setAttribute('d',fillFrom(line)); tile.crema.setAttribute('d',line)
+          if(p>0.02&&p<0.98){ const surge=0.5+0.5*Math.sin(t*0.9); tile.stream.style.opacity=(0.5+0.5*surge).toFixed(2); tile.stream.setAttribute('d', streamPath(CX,12,level-1, 8+6*surge)) }
+        }
+        else if (tile.key==='D'){ // rhythmic drops + ripples, calm surface
+          amp=1.2; freq=0.1; speed=0.7
+          const line=surfLine(level,amp,freq,t,speed,0)
+          tile.liquid.setAttribute('d',fillFrom(line)); tile.crema.setAttribute('d',line)
+          const INT=1.9, dc=(t % INT)/INT
+          if(p>0.02&&p<0.98){
+            if(dc<0.55){ const y=14+(level-14)*(dc/0.55); const r=6*(1-0.2*dc); tile.drop.style.opacity=1; tile.drop.setAttribute('cx',CX); tile.drop.setAttribute('cy',y.toFixed(1)); tile.drop.setAttribute('r',r.toFixed(1)) }
+            else { const age=(dc-0.55)/0.45; tile.ripEls.forEach((e,i)=>{ const a=Math.min(1,age+i*0.25); const rr=surfW(level)*0.5*a; e.setAttribute('cx',CX); e.setAttribute('cy',level.toFixed(1)); e.setAttribute('rx',rr.toFixed(1)); e.setAttribute('ry',(rr*0.3).toFixed(1)); e.style.opacity=((1-a)*0.6).toFixed(2) }) }
+          }
+        }
+      }
+    }
+    function surfW(level){ const dy=Math.abs(level-CY); return 2*Math.sqrt(Math.max(0,(R-2)*(R-2)-dy*dy)) }
+
+    frame(0, reduce ? 0.6 : 0)
+    if(!reduce){ const start=performance.now(); (function loop(now){ const e=(now-start)/1000; frame(e,(e%DUR)/DUR); requestAnimationFrame(loop) })(performance.now()) }
+  </script>
+</body>
+</html>

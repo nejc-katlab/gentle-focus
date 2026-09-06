@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — fluid timers</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body {
+      margin: 0; min-height: 100vh;
+      background: var(--bg); color: var(--ink);
+      font-family: var(--font); padding: 48px 24px;
+    }
+    .page-title { text-align: center; font-family: var(--font-serif); font-weight: 500; margin: 0 0 8px; }
+    .page-note { text-align: center; color: var(--muted); font-size: var(--fs-sm); margin: 0 0 40px; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 780px; margin: 0 auto; }
+    @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card); border: 1px solid var(--ring);
+      border-radius: var(--r-lg); padding: 28px 24px 24px; text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .variant-label { font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 0 0 4px; }
+    .variant-name { font-family: var(--font-serif); font-size: var(--fs-md); margin: 0 0 18px; }
+    .stage { display: block; width: 118px; height: 148px; margin: 0 auto; }
+    .caption { margin: 18px 0 0; color: var(--muted); font-size: var(--fs-sm); }
+
+    .liquid-sage   { fill: var(--accent); }
+    .liquid-coffee { fill: #7a5236; }
+    .liquid-water  { fill: #8bb6cf; }
+    .vessel { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+    .rim    { fill: none; stroke: var(--muted); stroke-width: 3.5; stroke-linecap: round; }
+    .steam  { fill: none; stroke: var(--faint); stroke-width: 3; stroke-linecap: round; opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Fluid timers — filling up</h2>
+  <p class="page-note">The pause fills like a vessel. Each loops every 15s.</p>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const DUR = 15
+
+    const tiles = [
+      { key:'A', label:'A · Vessel',   name:'Liquid rising',      shape:'circle', liquid:'liquid-sage',   goo:false, bubbles:0, pour:false, steam:false, topY:30, bottomY:118 },
+      { key:'B', label:'B · Metaballs',name:'Blobs merging up',   shape:'circle', liquid:'liquid-sage',   goo:true,  bubbles:4, pour:false, steam:false, topY:30, bottomY:118 },
+      { key:'C', label:'C · Coffee',   name:'Poured, gently',     shape:'cup',    liquid:'liquid-coffee', goo:false, bubbles:0, pour:true,  steam:true,  topY:52, bottomY:120 },
+      { key:'D', label:'D · Water',    name:'A glass filling',    shape:'glass',  liquid:'liquid-water',  goo:false, bubbles:0, pour:true,  steam:false, topY:50, bottomY:124 }
+    ]
+
+    const SHAPES = {
+      circle: { clip:'<circle cx="59" cy="74" r="44"/>', outline:'<circle class="vessel" cx="59" cy="74" r="44"/>' },
+      cup: {
+        clip:'<path d="M33 52 L85 52 L80 116 Q78 124 69 124 L49 124 Q40 124 38 116 Z"/>',
+        outline:'<path class="vessel" d="M33 52 L85 52 L80 116 Q78 124 69 124 L49 124 Q40 124 38 116 Z"/>' +
+                '<path class="rim" d="M85 62 Q102 64 100 82 Q98 98 84 96"/>'
+      },
+      glass: {
+        clip:'<path d="M37 50 L81 50 L76 120 Q75 126 69 126 L49 126 Q43 126 42 120 Z"/>',
+        outline:'<path class="vessel" d="M37 50 L81 50 L76 120 Q75 126 69 126 L49 126 Q43 126 42 120 Z"/>'
+      }
+    }
+
+    const grid = document.getElementById('grid')
+    for (const t of tiles) {
+      const sh = SHAPES[t.shape]
+      let inner = `<defs><clipPath id="clip${t.key}">${sh.clip}</clipPath>`
+      if (t.goo) inner += `<filter id="goo${t.key}"><feGaussianBlur in="SourceGraphic" stdDeviation="3.4" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"/></filter>`
+      inner += `</defs>`
+      inner += `<g clip-path="url(#clip${t.key})">`
+      inner += `<g ${t.goo ? `filter="url(#goo${t.key})"` : ''}>`
+      inner += `<path class="${t.liquid} surf"></path>`
+      for (let i=0;i<t.bubbles;i++) inner += `<circle class="${t.liquid} bub" data-i="${i}"></circle>`
+      inner += `</g></g>`
+      if (t.pour) inner += `<line class="${t.liquid.replace('liquid','pour')} pour" stroke-width="5" stroke-linecap="round"></line>`
+      inner += sh.outline
+      if (t.steam) inner += `<path class="steam st1"></path><path class="steam st2"></path>`
+
+      const card = document.createElement('div')
+      card.className = 'card'
+      card.innerHTML =
+        `<p class="variant-label">${t.label}</p><p class="variant-name">${t.name}</p>` +
+        `<svg class="stage" viewBox="0 0 118 148" aria-hidden="true">${inner}</svg>` +
+        `<p class="caption">A short pause, then you can continue.</p>`
+      grid.appendChild(card)
+      const svg = card.querySelector('svg')
+      t.surf = svg.querySelector('.surf')
+      t.bubEls = [...svg.querySelectorAll('.bub')]
+      t.pourEl = svg.querySelector('.pour')
+      t.st1 = svg.querySelector('.st1'); t.st2 = svg.querySelector('.st2')
+      // color the pour to match liquid
+      if (t.pourEl) t.pourEl.setAttribute('stroke', t.liquid==='liquid-coffee' ? '#7a5236' : '#8bb6cf')
+    }
+
+    const W = 118
+    function surfaceY(x, level, t, amp) {
+      return level + amp*Math.sin(x*0.09 - t*1.1) + amp*0.4*Math.sin(x*0.17 - t*1.6 + 1.1)
+    }
+    function buildSurface(level, t) {
+      const amp = 2.6
+      let d = ''
+      for (let i=0;i<=24;i++){ const x=(i/24)*W; d += (i===0?'M':'L')+x.toFixed(1)+' '+surfaceY(x,level,t,amp).toFixed(1)+' ' }
+      d += `L ${W} 148 L 0 148 Z`
+      return d
+    }
+
+    function frame(t, p) {
+      for (const tile of tiles) {
+        const level = tile.bottomY - p*(tile.bottomY - tile.topY)
+        tile.surf.setAttribute('d', buildSurface(level, t))
+        tile.bubEls.forEach((b, i) => {
+          const sp = 0.22 + i*0.05
+          const frac = ((t*sp + i*0.37) % 1)
+          const cy = tile.bottomY - frac*(tile.bottomY - level)
+          const cx = 40 + 38*(0.5+0.5*Math.sin(i*2.1)) + 4*Math.sin(t*0.9 + i)
+          const r = (6 - i*0.6) * (1 - frac*0.35)
+          b.setAttribute('cx', cx.toFixed(1)); b.setAttribute('cy', cy.toFixed(1)); b.setAttribute('r', Math.max(1.5,r).toFixed(1))
+        })
+        if (tile.pourEl) {
+          const show = p > 0.01 && p < 0.995
+          tile.pourEl.style.opacity = show ? '0.9' : '0'
+          const px = 59 + 1.5*Math.sin(t*3)
+          tile.pourEl.setAttribute('x1', px.toFixed(1)); tile.pourEl.setAttribute('y1', (tile.topY-14).toFixed(1))
+          tile.pourEl.setAttribute('x2', px.toFixed(1)); tile.pourEl.setAttribute('y2', (level-1).toFixed(1))
+        }
+        if (tile.st1) {
+          const sy = (x0, ph) => { let d=''; for(let i=0;i<=10;i++){ const y=44-i*4; const x=x0+5*Math.sin(y*0.18+t*1.4+ph); d+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ' } return d }
+          tile.st1.setAttribute('d', sy(52,0)); tile.st1.style.opacity=(0.35+0.2*Math.sin(t*1.3))
+          tile.st2.setAttribute('d', sy(66,2)); tile.st2.style.opacity=(0.3+0.2*Math.sin(t*1.3+1.5))
+        }
+      }
+    }
+
+    frame(0, reduce ? 0.6 : 0)
+    if (!reduce) {
+      const start = performance.now()
+      function loop(now){ const e=(now-start)/1000; frame(e, (e%DUR)/DUR); requestAnimationFrame(loop) }
+      requestAnimationFrame(loop)
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — settings preview</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="options.css">
+  <script>
+    window.chrome = {
+      storage: { local: {
+        _d: {
+          blocklist: [{ pattern: 'reddit.com', type: 'domain' }, { pattern: 'youtube.com/shorts/*', type: 'path' }],
+          schedules: [{ id: 's1', name: 'Work mornings', days: [1, 2, 3, 4, 5], start: '09:00', end: '12:00', strictness: 'firm', enabled: true }]
+        },
+        get(keys){ const l=Array.isArray(keys)?keys:[keys]; const o={}; for(const k of l)o[k]=this._d[k]; return Promise.resolve(o) },
+        set(obj){ Object.assign(this._d,obj); return Promise.resolve() },
+        clear(){ this._d={}; return Promise.resolve() }
+      } },
+      runtime: { getURL: p => '../' + p }
+    }
+  </script>
+</head>
+<body>
+  <script type="module">
+    const html = await (await fetch('./options.html')).text()
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    document.body.innerHTML = doc.body.innerHTML
+    document.querySelectorAll('body > script').forEach(s => s.remove())
+    await import(`./options.js?ts=${Date.now()}`)
+  </script>
+</body>
+</html>

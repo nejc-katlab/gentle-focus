@@ -9,8 +9,8 @@
 </head>
 <body>
   <main class="page">
-    <header class="brand-head">
-      <svg class="brand-logo" viewBox="124 20 290 464" aria-hidden="true">
+    <header class="brand">
+      <svg class="lotus-mark" viewBox="124 20 290 464" aria-hidden="true">
         <g transform="translate(0,512) scale(0.1,-0.1)" fill="currentColor" stroke="none">
           <path d="M2709 4883 c-14 -16 -38 -46 -54 -68 -17 -22 -38 -49 -47 -59 -10 -11 -21 -29 -24 -40 -4 -12 -9 -23 -13 -26 -3 -3 -18 -29 -33 -59 l-27 -53 35 -36 c18 -19 34 -39 34 -43 0 -4 6 -14 14 -22 36 -35 98 -174 127 -282 22 -79 17 -303 -8 -393 l-21 -74 30 29 c84 79 161 205 205 335 26 77 28 94 28 238 0 144 -2 160 -28 235 -16 44 -38 100 -50 125 -26 56 -127 220 -136 220 -3 0 -18 -12 -32 -27z"/>
           <path d="M2036 4703 c-10 -49 -21 -107 -27 -130 -22 -100 -8 -310 29 -430 30 -96 131 -245 214 -315 27 -24 60 -51 71 -61 35 -30 120 -75 192 -102 65 -25 69 -25 79 -8 32 54 66 225 66 328 0 130 -46 303 -106 401 -40 65 -131 166 -189 209 -22 16 -42 33 -45 36 -18 22 -247 159 -265 159 -1 0 -10 -39 -19 -87z"/>
@@ -23,10 +23,9 @@
           <path d="M2675 1633 c-64 -122 -136 -225 -213 -300 -46 -46 -88 -83 -93 -83 -5 0 -9 -16 -9 -36 0 -19 -4 -54 -9 -77 -5 -23 -17 -80 -26 -127 -9 -47 -20 -94 -25 -105 -5 -11 -18 -46 -29 -77 -44 -123 -134 -251 -211 -299 -48 -31 -146 -59 -203 -59 -53 0 -70 4 -142 36 -109 48 -164 192 -115 297 23 48 82 109 126 129 32 15 30 30 -5 66 -50 49 -97 67 -181 66 -86 0 -126 -16 -194 -75 -78 -69 -121 -201 -97 -301 26 -109 55 -162 133 -240 74 -74 150 -116 263 -144 94 -23 275 -24 370 0 401 98 624 410 679 947 17 163 22 419 8 419 -4 0 -16 -17 -27 -37z"/>
         </g>
       </svg>
-      <div>
-        <h1>Gentle Focus</h1>
-        <p class="lede">All data stays on this device. Nothing is sent anywhere.</p>
-      </div>
+      <p class="wordmark"><span>gentle</span><span class="wm-dot" aria-hidden="true"></span><span>focus</span></p>
+      <h1>Settings</h1>
+      <p class="lede">All data stays on this device. Nothing is sent anywhere.</p>
     </header>
 
     <section class="card">
@@ -64,7 +63,7 @@
         <span class="field-label">Fact reading time (seconds)</span>
         <input id="factDwellSec" type="number" min="0" max="120" step="1">
       </label>
-      <p class="field-label" style="margin-top:8px">Puzzles in rotation</p>
+      <p class="group-label">Puzzles in rotation</p>
       <label class="check"><input type="checkbox" id="pm-schulte"> Find the numbers (Schulte)</label>
       <label class="check"><input type="checkbox" id="pm-unscramble"> Unscramble a word</label>
       <label class="check"><input type="checkbox" id="pm-slide"> Sliding tiles</label>

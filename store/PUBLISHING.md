@@ -50,7 +50,7 @@ It's built for people who struggle with focus, including ADHD brains. The tone i
 
 HOW IT WORKS
 When you open a site on your blocklist, Gentle Focus catches it before the page loads and shows you a gentle gate. Choose how to pass it:
-• Wait a calm timer, with a breathing circle and a quiet quote
+• Wait a calm timer as the Continue button slowly fills, with a quiet quote
 • Solve a quick puzzle — a Schulte table, a word unscramble, sliding tiles, or Lights Out
 • Read a one-minute fun fact (150 curated, no repeats until you've seen them all)
 

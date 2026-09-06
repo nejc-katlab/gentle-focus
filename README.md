@@ -11,7 +11,7 @@ Built for people who struggle with focus, including ADHD brains. The tone is kin
 ## Features
 
 - **Blocklist** — whole domains, subdomains, or path globs (e.g. `youtube.com/shorts/*`).
-- **Friction gates** — a calm timer with a breathing circle + motivational quote, four seed-generated puzzles (Schulte table, word unscramble, sliding tiles, Lights Out), or a one-minute fun fact (150 curated).
+- **Friction gates** — a calm timer where the Continue button slowly fills like water, with a motivational quote, four seed-generated puzzles (Schulte table, word unscramble, sliding tiles, Lights Out), or a one-minute fun fact (150 curated).
 - **Time budgets** — per-site unlock minutes, expiry warning toast, optional daily caps.
 - **Focus sessions** — manual (25/50/90/custom) and scheduled (weekly), with three strictness levels (gentle / firm / strict).
 - **Override & pause** — a time-boxed escape hatch and a global pause that always auto-resumes.

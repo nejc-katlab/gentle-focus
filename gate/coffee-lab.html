@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gentle Focus — coffee timer</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <style>
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font);
+           display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; }
+    .page-title { font-family:var(--font-serif); font-weight:500; margin:0 0 6px; }
+    .page-note { color:var(--muted); font-size:var(--fs-sm); margin:0 0 26px; }
+    .card { background:var(--card); border:1px solid var(--ring); border-radius:var(--r-lg);
+            padding:34px 46px 28px; box-shadow:var(--shadow-card); text-align:center; }
+    .stage { display:block; width:210px; height:250px; margin:0 auto; }
+    .caption { margin:18px 0 0; color:var(--muted); font-size:var(--fs-sm); }
+    .ink { fill:none; stroke:#a9855f; stroke-width:6.5; stroke-linecap:round; stroke-linejoin:round; }
+    .steam { fill:none; stroke:#e9dcc6; stroke-width:5; stroke-linecap:round; }
+  </style>
+</head>
+<body>
+  <h2 class="page-title">Coffee timer</h2>
+  <p class="page-note">A cozy little pour. Loops every 15s.</p>
+  <div class="card">
+    <svg class="stage" viewBox="0 0 160 190" aria-hidden="true">
+      <defs>
+        <clipPath id="bowl"><path d="M40 78 A36 9 0 1 1 112 78 C112 148 98 164 76 164 C54 164 40 148 40 78 Z"/></clipPath>
+        <linearGradient id="inside" x1="0" y1="72" x2="0" y2="164" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#f1e7d6"/><stop offset="1" stop-color="#e0d0b8"/>
+        </linearGradient>
+        <linearGradient id="brew" x1="0" y1="164" x2="0" y2="80" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#a06e49"/><stop offset="1" stop-color="#bd8a63"/>
+        </linearGradient>
+      </defs>
+
+      <ellipse cx="78" cy="176" rx="46" ry="7" fill="#000" opacity="0.12"/>
+
+      <g id="scene">
+        <path id="st1" class="steam"></path>
+        <path id="st2" class="steam"></path>
+
+        <path class="ink" fill="none" d="M112 92 C 142 92 142 130 112 128"/>
+        <path class="ink" fill="#f4ebda" d="M40 78 C40 148 54 164 76 164 C98 164 112 148 112 78"/>
+
+        <g clip-path="url(#bowl)">
+          <path d="M40 78 A36 9 0 1 1 112 78 C112 148 98 164 76 164 C54 164 40 148 40 78 Z" fill="url(#inside)"/>
+          <path id="brewFill" fill="url(#brew)"></path>
+          <path id="foam" fill="none" stroke="#ecdcc2" stroke-width="4" stroke-linecap="round"></path>
+          <g id="face">
+            <circle id="blushL" fill="#e7a79f"></circle>
+            <circle id="blushR" fill="#e7a79f"></circle>
+            <path id="eyeL" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"></path>
+            <path id="eyeR" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"></path>
+            <path id="smile" fill="none" stroke="#5e3f2b" stroke-width="3.4" stroke-linecap="round"></path>
+          </g>
+        </g>
+
+        <ellipse cx="76" cy="78" rx="36" ry="9" fill="none" stroke="#c9b291" stroke-width="3" opacity="0.7"/>
+        <path class="ink" fill="none" d="M40 78 A36 9 0 0 0 112 78"/>
+      </g>
+    </svg>
+    <p class="caption">A short pause, then you can continue.</p>
+  </div>
+
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const DUR = 15, W = 160, TOPY = 84, BOTY = 156, CX = 76
+    const S = id => document.getElementById(id)
+    const scene=S('scene'), brew=S('brewFill'), foam=S('foam')
+    const eyeL=S('eyeL'), eyeR=S('eyeR'), smile=S('smile'), blushL=S('blushL'), blushR=S('blushR'), face=S('face')
+    const st1=S('st1'), st2=S('st2')
+
+    function surf(x, level, t){ return level + 1.6*Math.sin(x*0.11 - t*0.9) + 0.7*Math.sin(x*0.2 - t*1.3 + 1) }
+
+    function frame(t, p){
+      const bob = reduce ? 0 : 1.8*Math.sin(t*0.8)
+      scene.setAttribute('transform', `translate(0 ${bob.toFixed(2)})`)
+      const level = BOTY - p*(BOTY - TOPY)
+
+      let line=''
+      for(let i=0;i<=32;i++){ const x=(i/32)*W; line += (i===0?'M':'L')+x.toFixed(1)+' '+surf(x,level,t).toFixed(1)+' ' }
+      brew.setAttribute('d', line + `L ${W} 190 L 0 190 Z`)
+      foam.setAttribute('d', line)
+
+      // cute latte-art face rides on the coffee, blooming in as it fills
+      const o = Math.max(0, Math.min(1, (p-0.4)/0.22))
+      face.style.opacity = o.toFixed(2)
+      const fy = level + 20
+      eyeL.setAttribute('d', `M${CX-13} ${fy-3} q3 -4 6 0`)
+      eyeR.setAttribute('d', `M${CX+7} ${fy-3} q3 -4 6 0`)
+      smile.setAttribute('d', `M${CX-7} ${fy+7} q7 7 14 0`)
+      blushL.setAttribute('cx', CX-19); blushL.setAttribute('cy', fy+4); blushL.setAttribute('r', 4); blushL.style.opacity=(o*0.6).toFixed(2)
+      blushR.setAttribute('cx', CX+19); blushR.setAttribute('cy', fy+4); blushR.setAttribute('r', 4); blushR.style.opacity=(o*0.6).toFixed(2)
+
+      // curly steam
+      const curl=(x0,ph)=>{ let d=''; for(let i=0;i<=10;i++){ const yy=74-i*4.5; const xx=x0+6*Math.sin(yy*0.22+t*1.3+ph); d+=(i===0?'M':'L')+xx.toFixed(1)+' '+yy.toFixed(1)+' ' } return d }
+      st1.setAttribute('d', curl(66,0)); st1.style.opacity=(0.4+0.2*Math.sin(t*1.2)).toFixed(2)
+      st2.setAttribute('d', curl(86,2)); st2.style.opacity=(0.34+0.2*Math.sin(t*1.2+1.6)).toFixed(2)
+    }
+
+    frame(0, reduce ? 0.7 : 0)
+    if(!reduce){ const start=performance.now(); (function loop(now){ const e=(now-start)/1000; frame(e,(e%DUR)/DUR); requestAnimationFrame(loop) })(performance.now()) }
+  </script>
+</body>
+</html>
