@@ -129,20 +129,11 @@ On the "Data usage" form, declare:
 - **Used for anything besides the single purpose:** No.
 - Check the three certification boxes (no selling data, no unrelated use, no creditworthiness use) — all true.
 
-**Privacy policy (required — host this and paste the URL).** ⚠ TODO: publish this text at a public URL (e.g. a GitHub Pages page or a gist) and paste the link:
-```
-Gentle Focus — Privacy Policy
+**Privacy policy (required — host this and paste the URL).** The full policy now lives in [`PRIVACY.md`](../PRIVACY.md) at the repo root. It has been verified against the code: the only `fetch()` calls read bundled files via `chrome.runtime.getURL`, storage is `chrome.storage.local` only (no `storage.sync`), and there are no analytics or network egress calls.
 
-Gentle Focus does not collect, store remotely, or transmit any personal data.
-It has no servers, no accounts, and no analytics. All settings, your blocklist,
-and your usage statistics are stored locally in your browser (chrome.storage.local)
-and never leave your device. The extension reads the URLs you navigate to only to
-match them against the blocklist you configured; those URLs are not logged, stored,
-or sent anywhere. You can export or delete all of your data at any time from the
-extension's settings.
+To publish it: enable GitHub Pages on the repo (or paste the text into a public gist) and use that URL in the dashboard. The raw file also works: `https://raw.githubusercontent.com/<owner>/gentle-focus/main/PRIVACY.md`.
 
-Contact: <YOUR EMAIL>   ⚠ TODO
-```
+⚠ TODO: two placeholders remain in `PRIVACY.md`, both the `<owner>` GitHub slug (contact points to the repo's issues page, per decision — no personal email is exposed). Fill `<owner>` once the repo exists under your account.
 
 ---
 
