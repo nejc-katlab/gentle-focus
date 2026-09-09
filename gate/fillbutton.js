@@ -67,6 +67,11 @@ export function runFillButton(btn, seconds, onDone) {
     if (p >= 1) finish()
     else raf = requestAnimationFrame(loop)
   }
+  const staticP = typeof window !== 'undefined' ? window.__GF_FILL_STATIC : undefined
+  if (typeof staticP === 'number') {
+    frame(0, clamp(staticP, 0, 1))
+    return () => {}
+  }
   raf = requestAnimationFrame(loop)
   return () => cancelAnimationFrame(raf)
 }

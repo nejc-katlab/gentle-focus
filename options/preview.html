@@ -19,6 +19,11 @@
       } },
       runtime: { getURL: p => '../' + p }
     }
+    if (new URLSearchParams(location.search).get('bare')) {
+      const s = document.createElement('style')
+      s.textContent = '.card{opacity:1!important;transform:none!important} .lotus-mark{animation:none!important;transform:none!important}'
+      document.head.appendChild(s)
+    }
   </script>
 </head>
 <body>

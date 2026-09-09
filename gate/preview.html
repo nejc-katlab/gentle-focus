@@ -47,7 +47,7 @@
       storage: { local: {
         _d: {
           settings: {
-            budgetMin: 10, timerSec: 15, expiryWarnSec: 60, dailyCapMin: 0,
+            budgetMin: 10, timerSec: q.get('bare') ? 40 : 15, expiryWarnSec: 60, dailyCapMin: 0,
             gateTypes, surpriseMe: false, factDwellSec: 60, difficulty: 'medium',
             overrideDefaultMin: 15, overrideDelaySec: 3,
             sessionDefaultMin: 25, sessionDefaultStrictness: 'gentle', sessionEndNotify: true,
@@ -64,6 +64,12 @@
       } },
       runtime: { getURL: p => '../' + p, sendMessage: () => Promise.resolve({ ok: true }), openOptionsPage() {} }
     }
+    if (q.get('bare')) {
+      window.__GF_FILL_STATIC = 0.5
+      const s = document.createElement('style')
+      s.textContent = '.card{opacity:1!important;transform:none!important} .tile{opacity:1!important;transform:none!important} .lotus-mark{animation:none!important;transform:none!important}'
+      document.head.appendChild(s)
+    }
   </script>
 </head>
 <body>
@@ -75,13 +81,15 @@
     document.body.innerHTML = doc.body.innerHTML
     document.querySelectorAll('body > script').forEach(s => s.remove())
 
-    const bar = document.createElement('div')
-    bar.className = 'preview-bar'
-    const scenarios = ['chooser', 'timer', 'puzzle', 'fact']
-    bar.innerHTML = '<span>preview:</span>' +
-      scenarios.map(s => `<a href="?gate=${s}" class="${s === gate ? 'on' : ''}">${s}</a>`).join('') +
-      `<a href="?gate=${gate}&_=${Date.now()}">↻ replay</a>`
-    document.body.prepend(bar)
+    if (!new URLSearchParams(location.search).get('bare')) {
+      const bar = document.createElement('div')
+      bar.className = 'preview-bar'
+      const scenarios = ['chooser', 'timer', 'puzzle', 'fact']
+      bar.innerHTML = '<span>preview:</span>' +
+        scenarios.map(s => `<a href="?gate=${s}" class="${s === gate ? 'on' : ''}">${s}</a>`).join('') +
+        `<a href="?gate=${gate}&_=${Date.now()}">↻ replay</a>`
+      document.body.prepend(bar)
+    }
 
     history.replaceState(null, '', `?gate=${gate}&target=${encodeURIComponent(target)}`)
     await import(`./gate.js?ts=${Date.now()}`)
