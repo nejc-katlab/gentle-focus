@@ -243,7 +243,7 @@ continueBtn.addEventListener('click', async () => {
     return
   }
   await chrome.runtime.sendMessage({ type: 'GATE_COMPLETED', target, friction: frictionType })
-  location.href = target
+  location.replace(target)
 })
 
 function setupOverride() {
@@ -261,7 +261,7 @@ function setupOverride() {
     ovUnlock.disabled = true
     const durationMin = Number(ovDuration.value)
     await chrome.runtime.sendMessage({ type: 'OVERRIDE_REQUESTED', target, durationMin })
-    location.href = target
+    location.replace(target)
   })
 }
 
