@@ -11,8 +11,9 @@ Fields marked **⚠ TODO** need a value only you can supply.
 2. Sign in with the Google account you want to own the listing.
 3. Pay the **one-time $5 developer registration fee**.
 4. Accept the developer agreement.
+5. On the **Settings** page (account level, not the item), add a **publisher contact email** and complete the **email verification** Google sends. The item cannot publish until this address is verified. `nejc@katlab.dev` keeps it consistent with the listing identity.
 
-> I can't do steps 1–4 for you — they require your Google login, your payment, and your acceptance of Google's terms. Everything below, I've prepared.
+> I can't do steps 1–5 for you — they require your Google login, your payment, your acceptance of Google's terms, and access to your inbox. Everything below, I've prepared.
 
 ---
 
@@ -80,7 +81,13 @@ Gentle Focus helps users limit their own time on distracting websites by showing
 
 ## 3. Permission justifications
 
-Paste each into its box under Privacy practices → "Permission justification."
+Paste each into its box under Privacy practices → "Permission justification." The **single-purpose description** from §2 is also required here (top of the Privacy practices tab), and you must tick the three data-usage certification boxes and answer the remote-code question (below) before the item will publish.
+
+- **Remote code:** answer **"No, I am not using remote code."** Verified true: all JavaScript is bundled in the package — no externally hosted `<script>` tags, no `eval` of fetched code, no remote modules; the only `fetch()` calls read files packaged inside the extension via `chrome.runtime.getURL`. If a text box is forced:
+```
+This extension does not use remote code. All JavaScript is bundled in the package; there are no externally hosted scripts, no eval of fetched code, and no remote modules. The only network reads are of files packaged inside the extension.
+```
+
 
 - **Host permission `<all_urls>`:**
 ```
