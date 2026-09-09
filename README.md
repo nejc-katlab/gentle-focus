@@ -60,4 +60,4 @@ node --test
 
 ## Support
 
-If Gentle Focus helped you, you can [buy me a coffee](https://buymeacoffee.com/YOUR_HANDLE) — it goes toward domain costs. No pressure. 💛
+If Gentle Focus helped you, you can [support it on Ko-fi](https://ko-fi.com/katlab) — it goes toward domain costs. No pressure. 💛
