@@ -36,7 +36,7 @@ Gentle Focus requests only the browser permissions it needs to gate sites locall
 ## Contact
 
 Questions or concerns? Please open an issue:
-https://github.com/<owner>/gentle-focus/issues
+https://github.com/nejc-katlab/gentle-focus/issues
 
 ## Changes
 

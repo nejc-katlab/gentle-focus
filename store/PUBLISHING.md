@@ -131,9 +131,9 @@ On the "Data usage" form, declare:
 
 **Privacy policy (required — host this and paste the URL).** The full policy now lives in [`PRIVACY.md`](../PRIVACY.md) at the repo root. It has been verified against the code: the only `fetch()` calls read bundled files via `chrome.runtime.getURL`, storage is `chrome.storage.local` only (no `storage.sync`), and there are no analytics or network egress calls.
 
-To publish it: enable GitHub Pages on the repo (or paste the text into a public gist) and use that URL in the dashboard. The raw file also works: `https://raw.githubusercontent.com/<owner>/gentle-focus/main/PRIVACY.md`.
+To publish it: enable GitHub Pages on the repo (or paste the text into a public gist) and use that URL in the dashboard. The raw file also works: `https://raw.githubusercontent.com/nejc-katlab/gentle-focus/main/PRIVACY.md`.
 
-⚠ TODO: two placeholders remain in `PRIVACY.md`, both the `<owner>` GitHub slug (contact points to the repo's issues page, per decision — no personal email is exposed). Fill `<owner>` once the repo exists under your account.
+Contact points to the repo's GitHub issues page (no personal email exposed). Repo: https://github.com/nejc-katlab/gentle-focus
 
 ---
 
