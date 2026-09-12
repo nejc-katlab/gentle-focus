@@ -82,8 +82,8 @@ function renderWeek(history, usage) {
 }
 
 async function main() {
-  const [stats, overrideLog, usage] = await Promise.all([get('stats'), get('overrideLog'), getUsageToday()])
-  document.getElementById('streak').textContent = String(currentStreak(overrideLog, now, stats.installedOn))
+  const [stats, overrideLog, visitLog, usage] = await Promise.all([get('stats'), get('overrideLog'), get('visitLog'), getUsageToday()])
+  document.getElementById('streak').textContent = String(currentStreak(visitLog, now, stats.installedOn))
   document.getElementById('gates').textContent = String(stats.gatesPassed ?? 0)
   document.getElementById('ovWeek').textContent = String(overridesThisWeek(overrideLog, now))
   document.getElementById('ovTotal').textContent = String(overrideLog.length)

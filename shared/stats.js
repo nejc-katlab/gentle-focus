@@ -1,13 +1,13 @@
 import { todayKey } from './time.js'
 
-export function overrideDatesSet(overrideLog) {
+export function entryDatesSet(entryLog) {
   const set = new Set()
-  for (const entry of overrideLog ?? []) set.add(todayKey(new Date(entry.ts)))
+  for (const entry of entryLog ?? []) set.add(todayKey(new Date(entry.ts)))
   return set
 }
 
-export function currentStreak(overrideLog, now, sinceKey) {
-  const dates = overrideDatesSet(overrideLog)
+export function currentStreak(entryLog, now, sinceKey) {
+  const dates = entryDatesSet(entryLog)
   const day = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   let streak = 0
   while (!dates.has(todayKey(day)) && streak <= 3650) {

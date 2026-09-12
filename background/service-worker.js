@@ -73,7 +73,14 @@ async function grantUnlock(target, friction) {
   scheduleWarn(match.pattern, expiresAt, settings.expiryWarnSec)
   await bumpUnlockCount(match.pattern)
   await recordGatePass(friction)
+  await recordVisit(match.pattern, friction || 'gate')
   return expiresAt
+}
+
+async function recordVisit(site, via) {
+  const visitLog = await get('visitLog')
+  visitLog.push({ site, ts: Date.now(), via })
+  await set('visitLog', visitLog.slice(-500))
 }
 
 async function grantOverride(target, durationMin) {
@@ -88,6 +95,7 @@ async function grantOverride(target, durationMin) {
   await bumpUnlockCount(match.pattern)
   overrideLog.push({ site: match.pattern, ts: Date.now(), durationMin })
   await set('overrideLog', overrideLog.slice(-500))
+  await recordVisit(match.pattern, 'override')
   return expiresAt
 }
 

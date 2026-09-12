@@ -100,9 +100,9 @@ function renderHeader(site) {
 
 async function showStatLine() {
   if (!settings.showStatsOnGate) return
-  const [overrideLog, stats] = await Promise.all([get('overrideLog'), get('stats')])
-  const streak = currentStreak(overrideLog, new Date(), stats.installedOn)
-  gateStatEl.textContent = `${streak} day${streak === 1 ? '' : 's'} without an override.`
+  const [visitLog, stats] = await Promise.all([get('visitLog'), get('stats')])
+  const streak = currentStreak(visitLog, new Date(), stats.installedOn)
+  gateStatEl.textContent = `${streak} day${streak === 1 ? '' : 's'} distraction-free.`
   gateStatEl.hidden = false
 }
 

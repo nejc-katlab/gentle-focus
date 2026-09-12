@@ -29,6 +29,7 @@ const DEFAULTS = {
   session: { active: false, endsAt: 0, strictness: 'gentle', source: 'manual' },
   schedules: [],
   overrideLog: [],
+  visitLog: [],
   factsSeen: [],
   usageToday: { date: '', sites: {} },
   timing: { site: null, since: 0 },
